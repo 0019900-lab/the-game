@@ -1,6 +1,6 @@
 /* LAWLESS — Service Worker: يعمل بدون إنترنت، ويحدّث نفسه في الخلفية.
    غيّر رقم VERSION عند كل إصدار جديد لإجبار التحديث. */
-var VERSION = 'lawless-v1';
+var VERSION = 'lawless-v2';
 var ASSETS = ['./', './index.html', './sim.js', './rooms.js', './audio.js', './game.js', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/icon-180.png'];
 

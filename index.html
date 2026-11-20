@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0b0a12">
+<meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,44 +13,64 @@
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
-:root{--bg:#0b0a12;--violet:#211A35;--purple:#8060C8;--cyan:#55C9D5;--gold:#D6B66D;--txt:#f5f1fc;--muted:#b9b1ca;--glass:rgba(24,19,40,.72);--line:rgba(155,123,234,.28)}
+:root{--bg:#0b0a12;--violet:#211A35;--purple:#8060C8;--cyan:#55C9D5;--gold:#D6B66D;--txt:#f5f1fc;--muted:#b9b1ca;--glass:rgba(22,17,38,.76);--line:rgba(155,123,234,.30);--sans:"Segoe UI","Noto Sans Arabic","Cairo",Tahoma,system-ui,-apple-system,Roboto,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font:15px/1.6 "Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;overscroll-behavior:none;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font:15px/1.6 var(--sans);overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 #c{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
 #ui{position:fixed;inset:0;pointer-events:none;direction:ltr}
 #ui>*{pointer-events:auto}
-button{font:inherit;color:inherit;cursor:pointer}
-.ib{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);font-size:17px;display:grid;place-items:center;transition:.15s}
-.ib:active{transform:scale(.93)}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+svg.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+svg.ic.sm{width:16px;height:16px}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 6px 24px rgba(0,0,0,.35)}
+.ib{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;transition:transform .15s,opacity .15s,box-shadow .2s}
+.ib:active{transform:scale(.92)}
 .ib:disabled{opacity:.35}
-#top{position:absolute;top:max(10px,env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+/* شريط علوي */
+#top{position:absolute;top:max(10px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));display:flex;justify-content:space-between;align-items:center;pointer-events:none}
 #top>*{pointer-events:auto}
-#title{text-align:center;line-height:1.25;pointer-events:none}
-#title small{display:block;font-size:10px;letter-spacing:3px;color:var(--gold)}
-#title b{font-size:15px;letter-spacing:2px;text-shadow:0 0 14px rgba(128,96,200,.8)}
-#hint{position:absolute;top:calc(max(10px,env(safe-area-inset-top)) + 56px);left:50%;transform:translate(-50%,-6px);max-width:min(92vw,560px);padding:8px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);font-size:13px;text-align:center;direction:rtl;opacity:0;transition:.4s;pointer-events:none}
+#title{text-align:center;line-height:1.2;pointer-events:none}
+#title small{display:block;font-size:10px;letter-spacing:3.5px;color:var(--gold)}
+#title b{display:block;font-size:15px;letter-spacing:2.5px;text-shadow:0 0 16px rgba(128,96,200,.9)}
+#pips{display:flex;gap:6px;justify-content:center;margin-top:5px}
+#pips i{width:14px;height:4px;border-radius:3px;background:rgba(155,123,234,.28);transition:.3s}
+#pips i.done{background:var(--gold);box-shadow:0 0 8px rgba(214,182,109,.7)}
+#pips i.cur{background:var(--cyan);box-shadow:0 0 10px rgba(85,201,213,.9);width:22px}
+#hint{position:absolute;top:calc(max(10px,env(safe-area-inset-top)) + 62px);left:50%;transform:translate(-50%,-6px);max-width:min(92vw,560px);padding:8px 16px;border-radius:14px;font-size:13px;text-align:center;direction:rtl;opacity:0;transition:.4s;pointer-events:none;z-index:2}
 #hint.show{opacity:1;transform:translate(-50%,0)}
-#toast{position:absolute;top:42%;left:50%;transform:translate(-50%,8px);padding:10px 18px;border-radius:12px;background:rgba(40,28,64,.95);border:1px solid var(--gold);font-size:14px;direction:rtl;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast{position:absolute;top:44%;left:50%;transform:translate(-50%,8px);padding:10px 18px;border-radius:14px;background:rgba(40,28,64,.96);border:1px solid var(--gold);box-shadow:0 8px 30px rgba(0,0,0,.5);font-size:14px;direction:rtl;opacity:0;transition:.25s;pointer-events:none;max-width:92vw;text-align:center;z-index:9}
 #toast.show{opacity:1;transform:translate(-50%,0)}
-#bottom{position:absolute;left:0;right:0;bottom:0;padding:10px 12px max(12px,env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:10px;pointer-events:none}
+/* الجزء السفلي */
+#bottom{position:absolute;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));pointer-events:none}
 #bottom>*{pointer-events:auto}
-#mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
-#status{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;padding:6px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);font-size:11px;letter-spacing:1px;direction:rtl}
+#dock{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+#mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+#status{display:flex;gap:9px;align-items:center;justify-content:center;white-space:nowrap;padding:5px 14px;border-radius:999px;font-size:11px;letter-spacing:1px;direction:rtl;max-width:100%}
+#status .seg{display:flex;align-items:center;gap:5px;direction:ltr}
 #status b{color:var(--cyan)}
-#status .sep{opacity:.3}
-#tools{display:flex;gap:8px}
-#btnSim{height:64px;padding:0 22px;border-radius:18px;border:1px solid rgba(85,201,213,.7);background:linear-gradient(135deg,#5a3fb0,#2f6e86);font-weight:700;letter-spacing:2px;font-size:14px;box-shadow:0 0 26px rgba(85,201,213,.28),inset 0 0 18px rgba(255,255,255,.08);transition:.15s;white-space:nowrap}
+#status .sep{width:1px;height:12px;background:var(--line)}
+#status .mode{color:var(--gold)}
+#tools{display:flex;gap:2px;padding:4px;border-radius:18px}
+.tb{width:42px;height:42px;border-radius:14px;border:0;background:transparent;display:grid;place-items:center;transition:.15s;color:var(--txt)}
+.tb:active{transform:scale(.88);background:rgba(155,123,234,.2)}
+.tb:disabled{opacity:.3}
+#btnSim{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;height:64px;min-width:108px;padding:0 22px;border-radius:20px;border:1px solid rgba(85,201,213,.7);background:linear-gradient(135deg,#6a4cc4,#2f7e96);font-weight:700;letter-spacing:2px;font-size:14px;box-shadow:0 0 26px rgba(85,201,213,.28),inset 0 1px 0 rgba(255,255,255,.22);transition:transform .15s,opacity .2s;white-space:nowrap;color:#fff}
+#btnSim svg{fill:currentColor;stroke:none;width:18px;height:18px}
 #btnSim:active{transform:scale(.95)}
+#btnSim::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);opacity:0}
 #btnSim.armed{animation:pulse 1.3s ease-in-out infinite}
-#btnSim:disabled{opacity:.45;filter:saturate(.4);animation:none}
-@keyframes pulse{50%{box-shadow:0 0 42px rgba(85,201,213,.7),inset 0 0 18px rgba(255,255,255,.15)}}
+#btnSim.armed::after{opacity:1;animation:sheen 2.2s ease-in-out infinite}
+#btnSim:disabled{opacity:.42;filter:saturate(.4);animation:none}
+@keyframes pulse{50%{box-shadow:0 0 44px rgba(85,201,213,.75),inset 0 1px 0 rgba(255,255,255,.3)}}
+@keyframes sheen{0%{left:-60%}60%,100%{left:130%}}
 /* LAW SHIFTER */
 #shiftWrap{position:relative;width:72px;height:72px;flex:none}
-#shifter{position:absolute;inset:0;border:0;background:radial-gradient(circle,rgba(33,26,53,.95),rgba(15,12,26,.9));border-radius:50%;box-shadow:0 0 0 1px var(--line);transition:.25s}
+#shifter{position:absolute;inset:0;border:0;padding:0;background:radial-gradient(circle,rgba(40,30,70,.95),rgba(14,11,26,.95));border-radius:50%;box-shadow:0 0 0 1px var(--line),0 8px 24px rgba(0,0,0,.5);transition:box-shadow .25s,transform .15s}
+#shifter:active{transform:scale(.94)}
 #shifter i{position:absolute;border-radius:50%;pointer-events:none}
-#shifter .r1{inset:2px;border:2px solid rgba(214,182,109,.75);border-top-color:transparent;border-bottom-color:transparent;animation:spin 9s linear infinite}
-#shifter .r2{inset:11px;border:2px dashed rgba(85,201,213,.6);animation:spin 6s linear infinite reverse}
-#shifter .r3{inset:21px;border:2px solid rgba(128,96,200,.9);border-radius:28%;animation:spin 12s linear infinite}
+#shifter .r1{inset:2px;border:2px solid rgba(214,182,109,.8);border-top-color:transparent;border-bottom-color:transparent;animation:spin 9s linear infinite}
+#shifter .r2{inset:11px;border:2px dashed rgba(85,201,213,.65);animation:spin 6s linear infinite reverse}
+#shifter .r3{inset:21px;border:2px solid rgba(128,96,200,.95);border-radius:28%;animation:spin 12s linear infinite}
 #shifter .core{inset:29px;background:radial-gradient(circle at 35% 30%,#fff,var(--cyan) 40%,var(--purple));box-shadow:0 0 14px var(--cyan);transition:.25s}
 @keyframes spin{to{transform:rotate(360deg)}}
 #shifter.dormant i{animation-play-state:paused;opacity:.4}
@@ -59,97 +80,163 @@ button{font:inherit;color:inherit;cursor:pointer}
 #shifter.targeting .r2{animation-duration:2.2s}
 #shifter.running{box-shadow:0 0 0 2px var(--gold),0 0 36px rgba(214,182,109,.7)}
 #shifter.running .r1{animation-duration:1s}#shifter.running .r2{animation-duration:.8s}#shifter.running .r3{animation-duration:1.4s}
-#radial{position:absolute;left:0;bottom:0;width:72px;height:72px;pointer-events:none}
-#radial .law{position:absolute;left:10px;bottom:10px;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:rgba(24,19,40,.95);font-size:20px;display:grid;place-items:center;opacity:0;transform:translate(0,0) scale(.3);transition:.22s cubic-bezier(.3,1.4,.5,1);pointer-events:none}
-#radial.open .law{opacity:1;pointer-events:auto}
-#radial.open .law:nth-child(1){transform:translate(-2px,-86px) scale(1)}
-#radial.open .law:nth-child(2){transform:translate(58px,-62px) scale(1)}
-#radial.open .law:nth-child(3){transform:translate(82px,-6px) scale(1)}
-#radial .law small{position:absolute;bottom:-15px;font-size:8px;letter-spacing:1px;white-space:nowrap;color:var(--muted)}
-#radial .law[data-law=gravity]{border-color:var(--purple);box-shadow:0 0 14px rgba(128,96,200,.6)}
-#radial .law.lock{opacity:.5}
-#radial.open .law.lock{opacity:.5}
-/* D-Pad (portrait) */
-#dpad{position:absolute;left:50%;bottom:calc(98px + env(safe-area-inset-bottom));transform:translateX(-50%);display:none;gap:8px;padding:8px;border-radius:20px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px)}
-#dpad button{width:58px;height:50px;border-radius:14px;border:1px solid var(--line);background:rgba(48,40,72,.9);font-size:22px;transition:.12s}
-#dpad button.on{background:linear-gradient(135deg,#2f6e86,#5a3fb0);border-color:var(--cyan);box-shadow:0 0 14px rgba(85,201,213,.5)}
+#shifter.open{box-shadow:0 0 0 2px var(--purple),0 0 34px rgba(128,96,200,.8)}
+/* قائمة القوانين (بديلة للقائمة الدائرية المتداخلة) */
+#scrim{position:absolute;inset:0;background:rgba(6,5,12,.58);opacity:0;pointer-events:none;transition:opacity .2s;z-index:5}
+#scrim.show{opacity:1;pointer-events:auto}
+#lawSheet{position:absolute;z-index:6;left:12px;bottom:100px;width:min(88vw,318px);display:flex;flex-direction:column;gap:7px;padding:10px;border-radius:24px;background:linear-gradient(160deg,rgba(44,33,76,.97),rgba(20,16,36,.97));border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.65),0 0 50px rgba(128,96,200,.2);transform-origin:36px 100%;transform:scale(.82) translateY(16px);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,1.3,.4,1),opacity .18s}
+#lawSheet.open{transform:none;opacity:1;pointer-events:auto}
+#lawSheet h4{margin:2px 6px 0;font-size:10px;letter-spacing:3px;color:var(--gold);font-weight:600}
+.lawBtn{display:flex;align-items:center;gap:12px;padding:9px 12px 9px 9px;border-radius:17px;border:1px solid var(--line);background:rgba(255,255,255,.035);text-align:left;direction:ltr;transition:.15s}
+.lawBtn:active{transform:scale(.97)}
+.lawBtn .ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none}
+.lawBtn .nm{flex:1;min-width:0;font-weight:700;letter-spacing:1.8px;font-size:13px;line-height:1.35}
+.lawBtn .nm small{display:block;font-weight:400;letter-spacing:0;color:var(--muted);font-size:11px;unicode-bidi:plaintext;text-align:left}
+.lawBtn .st{font-size:10px;letter-spacing:1px;color:var(--cyan);flex:none}
+.lawBtn[data-law=gravity]{border-color:rgba(128,96,200,.7);background:rgba(128,96,200,.12)}
+.lawBtn[data-law=gravity] .ico{color:#c2adff;background:rgba(128,96,200,.25);box-shadow:0 0 18px rgba(128,96,200,.55)}
+.lawBtn[data-law=attraction] .ico{color:#8fe3ec;background:rgba(85,201,213,.12)}
+.lawBtn[data-law=reflection] .ico{color:#e8cf8f;background:rgba(214,182,109,.12)}
+.lawBtn.lock{opacity:.55}
+.lawBtn.lock .st{color:var(--muted)}
+/* D-Pad */
+#dpad{position:absolute;left:50%;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 124px);transform:translateX(-50%);display:none;gap:8px;padding:8px;border-radius:22px}
+#dpad button{width:60px;height:50px;border-radius:15px;border:1px solid var(--line);background:rgba(48,40,72,.9);display:grid;place-items:center;transition:.12s}
+#dpad button.on{background:linear-gradient(135deg,#2f6e86,#5a3fb0);border-color:var(--cyan);box-shadow:0 0 16px rgba(85,201,213,.55)}
 #dpad button:active{transform:scale(.92)}
+/* بورتريه: شبكة من صفين، لا تداخل أبدًا */
 @media (orientation:portrait){
-  body.sel #dpad{display:flex;bottom:calc(138px + env(safe-area-inset-bottom))}
-  #status{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 2px);white-space:nowrap;flex-wrap:nowrap}
-  #bottom{position:absolute}
+  body.sel #dpad{display:flex}
+  #dock{display:grid;grid-template-columns:72px auto 1fr;grid-template-areas:"status status status" "shift tools sim";align-items:end;gap:8px 10px}
+  #mid{display:contents}
+  #status{grid-area:status;justify-self:center}
+  #shiftWrap{grid-area:shift}
+  #tools{grid-area:tools;align-self:end}
+  #btnSim{grid-area:sim;min-width:0;width:100%}
 }
-/* Panels */
-.panel{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(8,6,16,.82);backdrop-filter:blur(10px);direction:rtl;overflow:auto}
+@media (max-width:359px){#btnSim span{display:none}#btnSim{padding:0}.tb{width:38px}}
+@media (max-height:540px) and (orientation:landscape){
+  #hint{top:64px;left:12px;transform:none;max-width:200px;text-align:right;font-size:12px}
+  #hint.show{transform:none}
+  #status{font-size:10px;padding:4px 12px}
+}
+/* لوحات */
+.panel{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(8,6,16,.84);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);direction:rtl;overflow:auto}
 .panel.show{display:flex}
-.box{width:min(94vw,460px);max-height:92vh;overflow:auto;padding:24px;border-radius:24px;background:linear-gradient(160deg,#241c3c,#161225);border:1px solid var(--line);box-shadow:0 20px 80px rgba(0,0,0,.6),0 0 60px rgba(128,96,200,.18);animation:pop .35s cubic-bezier(.2,1.3,.4,1)}
+.box{width:min(94vw,460px);max-height:92vh;overflow:auto;padding:24px;border-radius:26px;background:linear-gradient(160deg,#241c3c,#161225);border:1px solid var(--line);box-shadow:0 20px 80px rgba(0,0,0,.6),0 0 60px rgba(128,96,200,.18);animation:pop .4s cubic-bezier(.2,1.3,.4,1)}
 @keyframes pop{from{opacity:0;transform:scale(.9) translateY(14px)}}
 .box h2{margin:0 0 4px;font-size:19px}
 .box p{color:var(--muted);margin:6px 0;font-size:13px}
-.btn{display:block;width:100%;margin-top:10px;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:#302943;font-weight:600;transition:.15s}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:10px;padding:13px 16px;border-radius:15px;border:1px solid var(--line);background:#302943;font-weight:600;transition:.15s;color:var(--txt)}
 .btn:active{transform:scale(.97)}
 .btn.main{background:linear-gradient(135deg,#6a4cc4,#2f7e96);border-color:rgba(85,201,213,.6);box-shadow:0 0 22px rgba(85,201,213,.25)}
-#intro .box{text-align:center;padding:34px 24px;background:radial-gradient(ellipse at 50% 0,#3a2a60,transparent 60%),linear-gradient(160deg,#1d1633,#0f0c1b)}
+#intro .box{position:relative;text-align:center;padding:30px 24px 24px;background:radial-gradient(ellipse at 50% 0,#3d2c66,transparent 62%),linear-gradient(160deg,#1d1633,#0f0c1b);overflow:hidden}
+#emblem{width:116px;height:116px;margin:0 auto 4px;display:block;filter:drop-shadow(0 0 18px rgba(128,96,200,.8))}
+#emblem .a{transform-origin:60px 60px;animation:spin 22s linear infinite}
+#emblem .b{transform-origin:60px 60px;animation:spin 14s linear infinite reverse}
+#emblem .c{transform-origin:60px 60px;animation:spin 34s linear infinite}
+#emblem .core{animation:breathe 3s ease-in-out infinite;transform-origin:60px 60px}
+@keyframes breathe{50%{transform:scale(1.25);opacity:.8}}
 #intro .eyebrow{color:var(--cyan);letter-spacing:3px;font-size:10px}
-#intro h1{margin:8px 0 2px;font-size:clamp(40px,12vw,62px);letter-spacing:10px;font-weight:800;direction:ltr;text-shadow:0 0 30px rgba(128,96,200,.9),0 0 60px rgba(85,201,213,.3);padding-left:10px}
+#intro h1{margin:6px 0 2px;font-size:clamp(38px,12vw,60px);letter-spacing:10px;font-weight:800;direction:ltr;padding-left:10px;background:linear-gradient(100deg,#fff 20%,#c9b8ff 45%,#8fe9f3 55%,#fff 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(128,96,200,.8))}
+@keyframes shine{0%,100%{background-position:100% 0}50%{background-position:0 0}}
 #intro .tag{color:var(--gold);letter-spacing:3px;font-size:11px;direction:ltr;margin-bottom:14px}
-#intro .lore{font-size:13px;line-height:1.9;color:#d3c9e8}
+#intro .lore{font-size:13px;line-height:1.95;color:#d3c9e8}
 #roomList{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.roomBtn{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:#2a2340;text-align:right}
+.roomBtn{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:15px;border:1px solid var(--line);background:#2a2340;text-align:right;color:var(--txt)}
 .roomBtn .n{width:34px;height:34px;border-radius:10px;background:#3a2d5c;color:var(--gold);display:grid;place-items:center;font-weight:700}
 .roomBtn .t{flex:1;line-height:1.3}.roomBtn .t b{display:block;letter-spacing:1.5px;font-size:13px;direction:ltr;text-align:right}.roomBtn .t small{color:var(--muted);font-size:11px}
-.roomBtn .s{color:var(--gold);letter-spacing:2px;font-size:13px}
+.roomBtn .s{display:flex;gap:2px;color:var(--gold)}
+.roomBtn .s svg{width:15px;height:15px;stroke:none;fill:rgba(214,182,109,.25)}
+.roomBtn .s svg.on{fill:var(--gold)}
 .roomBtn.locked{opacity:.4}
-.stars{font-size:38px;letter-spacing:8px;color:var(--gold);text-align:center;margin:8px 0;text-shadow:0 0 20px rgba(214,182,109,.6)}
+.stars{display:flex;justify-content:center;gap:10px;margin:10px 0 4px;direction:ltr}
+.stars svg{width:50px;height:50px;fill:rgba(214,182,109,.18);stroke:rgba(214,182,109,.4);stroke-width:1;stroke-linejoin:round;transform:scale(.4);opacity:0;animation:starIn .55s cubic-bezier(.2,1.6,.4,1) forwards}
+.stars svg.on{fill:var(--gold);stroke:#fff3c9;filter:drop-shadow(0 0 12px rgba(214,182,109,.85))}
+@keyframes starIn{to{transform:scale(1);opacity:1}}
 .codex{margin-top:12px;padding:12px 14px;border-radius:12px;background:#1a2b31;border-right:3px solid var(--cyan);font-size:13px;color:#cfe9ec}
 .row{display:flex;gap:8px}.row .btn{flex:1}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5v14M15.5 5v14" stroke-width="3"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.8v14.4a.8.8 0 0 0 1.2.7l11.6-7.2a.8.8 0 0 0 0-1.4L8.7 4.1a.8.8 0 0 0-1.2.7z" stroke="none"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v15M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-gravity" viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M5 20h14"/></symbol>
+  <symbol id="i-attraction" viewBox="0 0 24 24"><path d="M2.5 12H9M6.2 9.2 9 12l-2.8 2.8M21.5 12H15M17.8 9.2 15 12l2.8 2.8"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-reflection" viewBox="0 0 24 24"><path d="M12 3 19 12l-7 9-7-9z"/><path d="M5 12h14M12 3l-3.4 9L12 21"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2.4"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5v5h3.6L13 19V5L7.6 9.5z"/><path d="M16.5 8.6a5 5 0 0 1 0 6.8M19 6a8.6 8.6 0 0 1 0 12"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.6L13 19V5L7.6 9.5z"/><path d="m17 9.5 5 5M22 9.5l-5 5"/></symbol>
+  <symbol id="i-fs" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-install" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.6" cy="6" r="1" fill="currentColor"/><circle cx="4.6" cy="12" r="1" fill="currentColor"/><circle cx="4.6" cy="18" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.6 6 20.9l1.3-6.7-5-4.7 6.8-.8z"/></symbol>
+</svg>
+
 <canvas id="c"></canvas>
 <div id="ui">
   <div id="top">
-    <button class="ib" id="btnMenu" aria-label="القائمة">☰</button>
-    <div id="title"><small id="stageName">THE AWAKENING</small><b id="roomName">—</b></div>
-    <button class="ib" id="btnPause" aria-label="إيقاف مؤقت">❚❚</button>
+    <button class="ib glass" id="btnMenu" aria-label="القائمة"><svg class="ic"><use href="#i-menu"/></svg></button>
+    <div id="title"><small id="stageName">THE AWAKENING</small><b id="roomName">—</b><div id="pips"></div></div>
+    <button class="ib glass" id="btnPause" aria-label="إيقاف مؤقت"><svg class="ic"><use href="#i-pause"/></svg></button>
   </div>
-  <div id="hint"></div>
+  <div id="hint" class="glass"></div>
   <div id="toast"></div>
-  <div id="dpad">
-    <button data-d="left" aria-label="يسار">←</button>
-    <button data-d="up" aria-label="أعلى">↑</button>
-    <button data-d="down" aria-label="أسفل">↓</button>
-    <button data-d="right" aria-label="يمين">→</button>
+  <div id="dpad" class="glass">
+    <button data-d="left" aria-label="يسار"><svg class="ic"><use href="#i-left"/></svg></button>
+    <button data-d="up" aria-label="أعلى"><svg class="ic"><use href="#i-up"/></svg></button>
+    <button data-d="down" aria-label="أسفل"><svg class="ic"><use href="#i-down"/></svg></button>
+    <button data-d="right" aria-label="يمين"><svg class="ic"><use href="#i-right"/></svg></button>
+  </div>
+  <div id="scrim"></div>
+  <div id="lawSheet" role="menu" aria-label="قوانين LAW SHIFTER">
+    <h4>LAW SHIFTER</h4>
+    <button class="lawBtn" data-law="gravity"><span class="ico"><svg class="ic"><use href="#i-gravity"/></svg></span><span class="nm">GRAVITY<small>غيّر اتجاه سقوط الكتلة</small></span><span class="st">نشط</span></button>
+    <button class="lawBtn lock" data-law="attraction"><span class="ico"><svg class="ic"><use href="#i-attraction"/></svg></span><span class="nm">ATTRACTION<small>يُفتح في THE PULLING VOID</small></span><svg class="ic sm"><use href="#i-lock"/></svg></button>
+    <button class="lawBtn lock" data-law="reflection"><span class="ico"><svg class="ic"><use href="#i-reflection"/></svg></span><span class="nm">REFLECTION<small>يُفتح في THE LIGHTLESS ARCHIVE</small></span><svg class="ic sm"><use href="#i-lock"/></svg></button>
   </div>
   <div id="bottom">
-    <div id="shiftWrap">
-      <div id="radial">
-        <button class="law" data-law="gravity" aria-label="Gravity">↓<small>GRAVITY</small></button>
-        <button class="law lock" data-law="attraction" aria-label="Attraction">↔<small>ATTRACTION</small></button>
-        <button class="law lock" data-law="reflection" aria-label="Reflection">◇<small>REFLECTION</small></button>
+    <div id="dock">
+      <div id="shiftWrap">
+        <button id="shifter" class="dormant" aria-label="LAW SHIFTER" aria-haspopup="menu"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="core"></i></button>
       </div>
-      <button id="shifter" class="dormant" aria-label="LAW SHIFTER"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="core"></i></button>
-    </div>
-    <div id="mid">
-      <div id="status"></div>
-      <div id="tools">
-        <button class="ib" id="btnUndo" aria-label="تراجع">↶</button>
-        <button class="ib" id="btnRedo" aria-label="إعادة">↷</button>
-        <button class="ib" id="btnReset" aria-label="إعادة الغرفة">⟲</button>
+      <div id="mid">
+        <div id="status" class="glass"></div>
+        <div id="tools" class="glass">
+          <button class="tb" id="btnUndo" aria-label="تراجع"><svg class="ic"><use href="#i-undo"/></svg></button>
+          <button class="tb" id="btnRedo" aria-label="إعادة"><svg class="ic"><use href="#i-redo"/></svg></button>
+          <button class="tb" id="btnReset" aria-label="إعادة الغرفة"><svg class="ic"><use href="#i-reset"/></svg></button>
+        </div>
       </div>
+      <button id="btnSim" aria-label="تشغيل المحاكاة"><svg class="ic"><use href="#i-play"/></svg><span>SIMULATE</span></button>
     </div>
-    <button id="btnSim">SIMULATE ▶</button>
   </div>
 </div>
 
 <div class="panel show" id="intro"><div class="box">
+  <svg id="emblem" viewBox="0 0 120 120" aria-hidden="true">
+    <g class="a" fill="none" stroke="#D6B66D" stroke-width="1.6"><circle cx="60" cy="60" r="54" stroke-dasharray="3 9" opacity=".8"/><path d="M60 8 105 86H15z" opacity=".55"/></g>
+    <g class="b" fill="none" stroke="#55C9D5" stroke-width="1.6"><circle cx="60" cy="60" r="40" stroke-dasharray="14 7"/><path d="M60 112 15 34h90z" opacity=".5"/></g>
+    <g class="c" fill="none" stroke="#8060C8" stroke-width="2.4"><rect x="38" y="38" width="44" height="44" rx="12"/></g>
+    <circle class="core" cx="60" cy="60" r="9" fill="#bff6ff"/>
+  </svg>
   <div class="eyebrow">CREATIVE PUZZLE · PHYSICS · LOGIC</div>
   <h1>LAWLESS</h1>
   <div class="tag">THE WORLD FORGOT ITS LAWS</div>
   <p class="lore">حضارة كاملة اختفت بعد أن اختلّت قوانين الطبيعة. لا أحد هنا ليشرح لك شيئًا. أمامك أداة قديمة نائمة: <b>LAW SHIFTER</b>. أنت لا تحرّك الأشياء، أنت تغيّر القانون الذي يحرّكها.</p>
-  <button class="btn main" id="btnStart">ابدأ الرحلة</button>
-  <button class="btn js-mute">🔊 الصوت: يعمل</button>
-  <button class="btn" id="btnInstall" style="display:none">⬇ تثبيت اللعبة على الجهاز</button>
+  <button class="btn main" id="btnStart"><svg class="ic sm" style="fill:currentColor;stroke:none"><use href="#i-play"/></svg>ابدأ الرحلة</button>
+  <button class="btn js-mute"><svg class="ic sm"><use href="#i-sound"/></svg><span class="t">الصوت: يعمل</span></button>
+  <button class="btn" id="btnInstall" style="display:none"><svg class="ic sm"><use href="#i-install"/></svg>تثبيت اللعبة على الجهاز</button>
   <p style="font-size:11px;margin-top:14px">للتجربة الأفضل على الهاتف: لفّ الشاشة أفقيًا أو استخدم الوضع الرأسي مع أزرار الاتجاه.</p>
 </div></div>
 
@@ -161,20 +248,21 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 <div class="panel" id="pause"><div class="box">
   <h2>إيقاف مؤقت</h2>
-  <button class="btn main" id="btnResume">متابعة</button>
-  <button class="btn" id="btnRestart">إعادة الغرفة</button>
-  <button class="btn" id="btnToMenu">قائمة الغرف</button>
-  <button class="btn js-mute">🔊 الصوت: يعمل</button>
-  <button class="btn" id="btnFs">⛶ ملء الشاشة</button>
+  <button class="btn main" id="btnResume"><svg class="ic sm" style="fill:currentColor;stroke:none"><use href="#i-play"/></svg>متابعة</button>
+  <button class="btn" id="btnRestart"><svg class="ic sm"><use href="#i-reset"/></svg>إعادة الغرفة</button>
+  <button class="btn" id="btnToMenu"><svg class="ic sm"><use href="#i-list"/></svg>قائمة الغرف</button>
+  <button class="btn js-mute"><svg class="ic sm"><use href="#i-sound"/></svg><span class="t">الصوت: يعمل</span></button>
+  <button class="btn" id="btnFs"><svg class="ic sm"><use href="#i-fs"/></svg>ملء الشاشة</button>
 </div></div>
 
 <div class="panel" id="clear"><div class="box">
-  <h2 id="clearTitle">تم فتح البوابة</h2>
-  <div class="stars" id="clearStars">★★★</div>
+  <div id="clearRoom" style="color:var(--gold);letter-spacing:3px;font-size:11px;direction:ltr;text-align:center"></div>
+  <h2 id="clearTitle" style="text-align:center;font-size:22px">تم فتح البوابة</h2>
+  <div class="stars" id="clearStars"></div>
   <p id="clearInfo" style="text-align:center"></p>
   <div class="codex" id="clearCodex"></div>
   <button class="btn main" id="btnNext">الغرفة التالية</button>
-  <div class="row"><button class="btn" id="btnReplay">إعادة اللعب</button><button class="btn" id="btnClearMenu">القائمة</button></div>
+  <div class="row"><button class="btn" id="btnReplay"><svg class="ic sm"><use href="#i-reset"/></svg>إعادة اللعب</button><button class="btn" id="btnClearMenu"><svg class="ic sm"><use href="#i-list"/></svg>القائمة</button></div>
 </div></div>
 
 <script src="sim.js"></script>

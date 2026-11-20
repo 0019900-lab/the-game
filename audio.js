@@ -1,83 +1,119 @@
-/* LAWLESS — صوت Procedural بالكامل عبر Web Audio API (بدون ملفات صوتية) */
+/* LAWLESS — صوت Procedural بالكامل عبر Web Audio API (بدون ملفات صوتية)
+   v2: سلسلة ماستر آمنة (فلتر + ليميتر + تشبّع ناعم)، reverb ناعم بدون هسهسة،
+   سقف للأصوات المتزامنة، وإزالة الموجات الحادة (sawtooth/square) التي كانت تسبب الخروشة. */
 var AudioFX = (function () {
   'use strict';
-  var ac = null, master, sfx, mus, verb, noiseBuf, muted = false, pad = null, pingT = 0;
+  var ac = null, master, sfx, mus, noiseBuf, muted = false, pad = null, pingT = 0;
+  var voices = 0, MAX_VOICES = 22, lastLand = 0, lastDir = 0;
   var PENT = [0, 2, 4, 7, 9];
   function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
 
-  function impulse(sec, decay) {
-    var n = (ac.sampleRate * sec) | 0, b = ac.createBuffer(2, n, ac.sampleRate);
+  // IR ناعم: ضجيج مرشّح بمرشح تمرير منخفض متحرك + بداية متدرجة (بدون نقرة) + تلاشٍ أسي
+  function impulse(sec) {
+    var rate = ac.sampleRate, n = (rate * sec) | 0, b = ac.createBuffer(2, n, rate);
     for (var c = 0; c < 2; c++) {
-      var d = b.getChannelData(c);
-      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay);
+      var d = b.getChannelData(c), lp = 0;
+      for (var i = 0; i < n; i++) {
+        var t = i / n, k = 0.06 + 0.5 * Math.pow(1 - t, 2);   // يغمق الذيل تدريجيًا
+        lp += (Math.random() * 2 - 1 - lp) * k;
+        var env = Math.pow(1 - t, 3.2) * Math.min(1, i / (rate * 0.012));
+        d[i] = lp * env * 1.6;
+      }
     }
     return b;
   }
 
-  function init() {
-    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
-    var AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    ac = new AC();
-    master = ac.createGain(); master.gain.value = muted ? 0 : 0.9;
-    var comp = ac.createDynamicsCompressor();
-    comp.threshold.value = -16; comp.ratio.value = 4;
-    master.connect(comp); comp.connect(ac.destination);
+  function init(ctx) {
+    if (ac) { if (ac.state === 'suspended' && ac.resume) ac.resume(); return; }
+    if (ctx) ac = ctx;
+    else {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try { ac = new AC({ latencyHint: 'balanced' }); } catch (e) { ac = new AC(); }
+    }
+    // السلسلة: [sfx+mus] → (جاف + reverb) → bus → فلتر 9kHz → ليميتر → تشبّع ناعم → master
+    var bus = ac.createGain(); bus.gain.value = 0.62;
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9000; lp.Q.value = 0.5;
+    var hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 28; hp.Q.value = 0.5;
+    var lim = ac.createDynamicsCompressor();
+    lim.threshold.value = -9; lim.knee.value = 6; lim.ratio.value = 12; lim.attack.value = 0.003; lim.release.value = 0.12;
+    var sat = ac.createWaveShaper(), curve = new Float32Array(1024);
+    for (var i = 0; i < 1024; i++) { var x = i / 512 - 1; curve[i] = Math.tanh(x * 1.15) / Math.tanh(1.15); }
+    sat.curve = curve;
+    master = ac.createGain(); master.gain.value = muted ? 0 : 1;
+    bus.connect(hp); hp.connect(lp); lp.connect(lim); lim.connect(sat); sat.connect(master); master.connect(ac.destination);
+
+    var verb = ac.createConvolver(); verb.buffer = impulse(1.7);
+    var vf = ac.createBiquadFilter(); vf.type = 'lowpass'; vf.frequency.value = 3800; vf.Q.value = 0.4;
+    var wet = ac.createGain(); wet.gain.value = 0.28;
+    verb.connect(vf); vf.connect(wet); wet.connect(bus);
     sfx = ac.createGain(); sfx.gain.value = 0.85;
-    mus = ac.createGain(); mus.gain.value = 0.5;
-    verb = ac.createConvolver(); verb.buffer = impulse(2.8, 2.4);
-    var wet = ac.createGain(); wet.gain.value = 0.34;
-    verb.connect(wet); wet.connect(master);
-    sfx.connect(master); sfx.connect(verb); mus.connect(master); mus.connect(verb);
-    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
-    var d = noiseBuf.getChannelData(0);
-    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    mus = ac.createGain(); mus.gain.value = 0.55;
+    sfx.connect(bus); sfx.connect(verb);
+    mus.connect(bus); mus.connect(verb);
+
+    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+    var nd = noiseBuf.getChannelData(0), b0 = 0, b1 = 0, b2 = 0;
+    for (var j = 0; j < nd.length; j++) {          // ضجيج وردي (أنعم من الأبيض)
+      var w = Math.random() * 2 - 1;
+      b0 = 0.99765 * b0 + w * 0.0990460; b1 = 0.96300 * b1 + w * 0.2965164; b2 = 0.57000 * b2 + w * 1.0526913;
+      nd[j] = (b0 + b1 + b2 + w * 0.1848) * 0.2;
+    }
+    var xf = (ac.sampleRate * 0.04) | 0;           // بداية/نهاية الحلقة تبدأ وتنتهي عند الصفر: لا نقرة
+    for (var k = 0; k < xf; k++) { var a = k / xf; nd[k] *= a; nd[nd.length - 1 - k] *= a; }
   }
 
+  function take() { if (voices >= MAX_VOICES) return false; voices++; return true; }
+  function release() { voices = Math.max(0, voices - 1); }
+
+  function pannerFor(o, g) {
+    if (o.pan !== undefined && ac.createStereoPanner) {
+      var p = ac.createStereoPanner(); p.pan.value = o.pan; g.connect(p); return p;
+    }
+    return g;
+  }
+
+  // نغمة بغلاف ناعم: هجوم ≥ 6ms، وتلاشٍ بـ setTarget (بلا قفزات) ثم إيقاف بعد الصمت
   function tone(o) {
-    if (!ac) return;
+    if (!ac || !take()) return;
     var t0 = ac.currentTime + (o.at || 0), osc = ac.createOscillator(), g = ac.createGain();
     osc.type = o.type || 'sine';
     osc.frequency.setValueAtTime(o.f, t0);
-    if (o.f2) osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.f2), t0 + o.dur);
-    var a = o.attack || 0.005, v = o.vol || 0.2;
-    g.gain.setValueAtTime(0.0001, t0);
+    if (o.f2) osc.frequency.exponentialRampToValueAtTime(Math.max(20, o.f2), t0 + o.dur * 0.9);
+    var a = Math.max(0.006, o.attack || 0.006), v = o.vol || 0.15;
+    g.gain.setValueAtTime(0, t0);
     g.gain.linearRampToValueAtTime(v, t0 + a);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + o.dur);
+    g.gain.setTargetAtTime(0, t0 + a, Math.max(0.02, (o.dur - a) / 4.2));
     osc.connect(g);
-    var out = g;
-    if (o.pan !== undefined && ac.createStereoPanner) {
-      var p = ac.createStereoPanner(); p.pan.value = o.pan; g.connect(p); out = p;
-    }
+    var out = pannerFor(o, g);
+    if (o.lp) { var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; f.Q.value = 0.3; out.connect(f); out = f; }
     out.connect(o.dest || sfx);
-    osc.start(t0); osc.stop(t0 + o.dur + 0.05);
+    osc.onended = release;
+    osc.start(t0); osc.stop(t0 + o.dur + 0.08);
   }
 
   function noise(o) {
-    if (!ac) return;
+    if (!ac || !take()) return;
     var t0 = ac.currentTime + (o.at || 0), src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
     src.buffer = noiseBuf; src.loop = true;
-    f.type = o.ftype || 'bandpass'; f.Q.value = o.q || 1;
+    f.type = o.ftype || 'lowpass'; f.Q.value = Math.min(o.q || 0.6, 1.6);
     f.frequency.setValueAtTime(o.fc, t0);
-    if (o.fc2) f.frequency.exponentialRampToValueAtTime(Math.max(20, o.fc2), t0 + o.dur);
-    var a = o.attack || 0.01;
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.linearRampToValueAtTime(o.vol || 0.15, t0 + a);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + o.dur);
+    if (o.fc2) f.frequency.exponentialRampToValueAtTime(Math.max(40, o.fc2), t0 + o.dur * 0.9);
+    var a = Math.max(0.012, o.attack || 0.012);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(o.vol || 0.08, t0 + a);
+    g.gain.setTargetAtTime(0, t0 + a, Math.max(0.03, (o.dur - a) / 4));
     src.connect(f); f.connect(g);
-    var out = g;
-    if (o.pan !== undefined && ac.createStereoPanner) {
-      var p = ac.createStereoPanner(); p.pan.value = o.pan; g.connect(p); out = p;
-    }
-    out.connect(sfx);
-    src.start(t0); src.stop(t0 + o.dur + 0.05);
+    pannerFor(o, g).connect(sfx);
+    src.onended = release;
+    src.start(t0, Math.random() * 1.2); src.stop(t0 + o.dur + 0.08);
   }
 
+  // جرس: مكوّنان فقط (أساسي + جزئي) بدل ثلاثة
   function bell(f, at, vol, dest, dur) {
     dur = dur || 1.6;
-    tone({ f: f, dur: dur, vol: vol, at: at, type: 'sine', attack: 0.004, dest: dest });
-    tone({ f: f * 2.756, dur: dur * 0.5, vol: vol * 0.35, at: at, type: 'sine', attack: 0.004, dest: dest });
-    tone({ f: f * 5.4, dur: dur * 0.25, vol: vol * 0.15, at: at, type: 'sine', attack: 0.002, dest: dest });
+    tone({ f: f, dur: dur, vol: vol, at: at, attack: 0.008, dest: dest });
+    tone({ f: f * 2.76, dur: dur * 0.4, vol: vol * 0.22, at: at, attack: 0.006, dest: dest });
   }
 
   var api = {
@@ -87,88 +123,85 @@ var AudioFX = (function () {
     isMuted: function () { return muted; },
     setMuted: function (m) {
       muted = !!m;
-      if (ac) master.gain.setTargetAtTime(muted ? 0 : 0.9, ac.currentTime, 0.05);
+      if (ac) master.gain.setTargetAtTime(muted ? 0 : 1, ac.currentTime, 0.06);
     },
-    click: function () { tone({ f: 660, f2: 520, dur: 0.06, vol: 0.12, type: 'triangle' }); },
+    click: function () { tone({ f: 640, f2: 520, dur: 0.07, vol: 0.09 }); },
     select: function () {
-      tone({ f: 880, f2: 1320, dur: 0.09, vol: 0.14, type: 'sine' });
-      tone({ f: 1760, dur: 0.12, vol: 0.05, at: 0.03, type: 'sine' });
+      tone({ f: 880, f2: 1250, dur: 0.1, vol: 0.1 });
+      tone({ f: 1760, dur: 0.14, vol: 0.035, at: 0.03 });
     },
-    // معاينة اتجاه: نغمة قصيرة تختلف حسب الاتجاه
     dir: function (d) {
+      var now = ac ? ac.currentTime : 0; if (now - lastDir < 0.05) return; lastDir = now;
       var base = { up: 740, right: 622, down: 494, left: 554 }[d] || 600;
-      var pan = d === 'left' ? -0.6 : d === 'right' ? 0.6 : 0;
-      tone({ f: base, f2: base * (d === 'up' ? 1.25 : d === 'down' ? 0.8 : 1.05), dur: 0.12, vol: 0.13, type: 'triangle', pan: pan });
+      var pan = d === 'left' ? -0.5 : d === 'right' ? 0.5 : 0;
+      tone({ f: base, f2: base * (d === 'up' ? 1.2 : d === 'down' ? 0.84 : 1.04), dur: 0.14, vol: 0.09, pan: pan });
     },
     activate: function () {
-      [392, 587.3, 784, 1174.7].forEach(function (f, i) {
-        tone({ f: f, dur: 1.4, vol: 0.09, at: i * 0.08, attack: 0.25, type: 'sine' });
-      });
-      noise({ fc: 400, fc2: 4200, q: 3, dur: 0.9, vol: 0.05, attack: 0.4 });
+      [392, 587.3, 784, 1174.7].forEach(function (f, i) { tone({ f: f, dur: 1.5, vol: 0.06, at: i * 0.09, attack: 0.3 }); });
+      noise({ fc: 500, fc2: 3000, dur: 0.9, vol: 0.025, attack: 0.4 });
     },
-    // بدء المحاكاة: اجتياح فلتر + نبضة
     simulate: function (d) {
-      var pan = d === 'left' ? -0.5 : d === 'right' ? 0.5 : 0;
-      var up = d === 'up';
-      noise({ fc: up ? 300 : 2200, fc2: up ? 2400 : 260, q: 2, dur: 0.5, vol: 0.16, attack: 0.04, pan: pan });
-      tone({ f: up ? 180 : 520, f2: up ? 520 : 150, dur: 0.45, vol: 0.12, type: 'sawtooth', pan: pan });
+      var pan = d === 'left' ? -0.4 : d === 'right' ? 0.4 : 0, up = d === 'up';
+      noise({ fc: up ? 400 : 1800, fc2: up ? 1800 : 380, dur: 0.5, vol: 0.05, attack: 0.05, pan: pan });
+      tone({ f: up ? 200 : 500, f2: up ? 500 : 170, dur: 0.42, vol: 0.075, type: 'triangle', pan: pan, lp: 2400 });
     },
     land: function (p) {
+      var now = ac ? ac.currentTime : 0; if (now - lastLand < 0.07) return; lastLand = now;
       p = Math.max(0.15, Math.min(1, p || 0.5));
-      tone({ f: 120, f2: 42, dur: 0.22 + p * 0.15, vol: 0.28 * p + 0.1, type: 'sine' });
-      noise({ fc: 900, fc2: 120, q: 0.8, dur: 0.18, vol: 0.14 * p + 0.04, ftype: 'lowpass' });
-      tone({ f: 260, f2: 180, dur: 0.1, vol: 0.05, type: 'square' });
+      tone({ f: 130, f2: 52, dur: 0.24 + p * 0.12, vol: 0.2 * p + 0.07 });
+      noise({ fc: 700, fc2: 140, dur: 0.16, vol: 0.06 * p + 0.02 });
+      tone({ f: 300, f2: 210, dur: 0.08, vol: 0.03, type: 'triangle', lp: 1800 });
     },
     plate: function (on) {
-      if (on) { bell(784, 0, 0.12, null, 1.4); bell(1175, 0.09, 0.08, null, 1.2); }
-      else tone({ f: 330, f2: 220, dur: 0.18, vol: 0.1, type: 'triangle' });
+      if (on) { bell(784, 0, 0.08, null, 1.3); bell(1175, 0.09, 0.05, null, 1.1); }
+      else tone({ f: 330, f2: 230, dur: 0.18, vol: 0.07, type: 'triangle', lp: 1600 });
     },
     success: function () {
-      [0, 4, 7, 12, 16].forEach(function (iv, i) { bell(hz(72 + iv), i * 0.11, 0.1, null, 2.2); });
+      [0, 4, 7, 12, 16].forEach(function (iv, i) { bell(hz(72 + iv), i * 0.12, 0.07, null, 2); });
     },
     gate: function () {
-      noise({ fc: 120, fc2: 900, q: 1.5, dur: 1.4, vol: 0.18, attack: 0.3, ftype: 'lowpass' });
-      tone({ f: 98, f2: 196, dur: 1.6, vol: 0.14, type: 'sawtooth', attack: 0.4 });
-      [0, 7, 12].forEach(function (iv, i) { tone({ f: hz(60 + iv), dur: 2.2, vol: 0.08, at: 0.3 + i * 0.12, attack: 0.5 }); });
+      noise({ fc: 140, fc2: 800, dur: 1.4, vol: 0.07, attack: 0.3 });
+      tone({ f: 98, f2: 180, dur: 1.6, vol: 0.09, type: 'triangle', attack: 0.4, lp: 900 });
+      [0, 7, 12].forEach(function (iv, i) { tone({ f: hz(60 + iv), dur: 2.2, vol: 0.05, at: 0.3 + i * 0.12, attack: 0.5 }); });
     },
     error: function () {
-      tone({ f: 170, dur: 0.12, vol: 0.14, type: 'square' });
-      tone({ f: 130, dur: 0.18, vol: 0.14, at: 0.1, type: 'square' });
+      tone({ f: 180, dur: 0.12, vol: 0.09, type: 'triangle', lp: 1400 });
+      tone({ f: 135, dur: 0.18, vol: 0.09, at: 0.1, type: 'triangle', lp: 1400 });
     },
     locked: function () {
-      tone({ f: 220, dur: 0.08, vol: 0.12, type: 'triangle' });
-      tone({ f: 165, dur: 0.14, vol: 0.12, at: 0.07, type: 'triangle' });
+      tone({ f: 230, dur: 0.09, vol: 0.08, type: 'triangle', lp: 1500 });
+      tone({ f: 170, dur: 0.15, vol: 0.08, at: 0.07, type: 'triangle', lp: 1500 });
     },
-    undo: function () { tone({ f: 600, f2: 360, dur: 0.14, vol: 0.12, type: 'triangle' }); },
+    undo: function () { tone({ f: 600, f2: 380, dur: 0.15, vol: 0.08, type: 'triangle', lp: 2000 }); },
 
-    // أجواء المنطقة: Pad هادئ + أجراس عشوائية على السلم الخماسي
+    // أجواء: Pad ناعم من موجات جيبية/مثلثية فقط + أجراس خماسية متباعدة
     ambience: function (root) {
       if (!ac) return;
       api.stopAmbience();
       var t = ac.currentTime, nodes = [];
-      var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.Q.value = 0.7;
-      var g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 5);
+      var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700; lp.Q.value = 0.4;
+      var g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.14, t + 6);
       lp.connect(g); g.connect(mus);
-      [0, 7, 12, 16].forEach(function (iv, i) {
-        [-7, 7].forEach(function (det) {
-          var o = ac.createOscillator(); o.type = i % 2 ? 'triangle' : 'sawtooth';
+      [0, 7, 12].forEach(function (iv, i) {
+        [-6, 6].forEach(function (det) {
+          var o = ac.createOscillator(); o.type = i === 0 ? 'triangle' : 'sine';
           o.frequency.value = hz(root + iv - 12); o.detune.value = det;
-          var og = ac.createGain(); og.gain.value = 0.05;
-          o.connect(og); og.connect(lp); o.start(); nodes.push(o);
+          var og = ac.createGain(); og.gain.value = i === 0 ? 0.07 : 0.05;
+          o.connect(og); og.connect(lp); o.start(t); nodes.push(o);
         });
       });
-      var lfo = ac.createOscillator(); lfo.frequency.value = 0.06;
-      var lg = ac.createGain(); lg.gain.value = 260;
-      lfo.connect(lg); lg.connect(lp.frequency); lfo.start(); nodes.push(lfo);
+      var lfo = ac.createOscillator(); lfo.frequency.value = 0.05;
+      var lg = ac.createGain(); lg.gain.value = 180;
+      lfo.connect(lg); lg.connect(lp.frequency); lfo.start(t); nodes.push(lfo);
       pad = { nodes: nodes, g: g };
       (function ping() {
         pingT = setTimeout(function () {
-          if (ac && pad && !muted) {
+          if (ac && pad && !muted && !document.hidden) {
             var n = root + 12 + PENT[(Math.random() * 5) | 0] + (Math.random() < 0.3 ? 12 : 0);
-            bell(hz(n), 0, 0.045, mus, 3.2);
+            bell(hz(n), 0, 0.03, mus, 3);
           }
           ping();
-        }, 2600 + Math.random() * 4200);
+        }, 3200 + Math.random() * 4500);
       })();
     },
     stopAmbience: function () {
@@ -181,3 +214,4 @@ var AudioFX = (function () {
   };
   return api;
 })();
+if (typeof module !== 'undefined' && module.exports) module.exports = AudioFX;
