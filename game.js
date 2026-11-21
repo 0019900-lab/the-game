@@ -943,16 +943,17 @@ function buildCodex() {
 function buildAch() {
   var total = 0, three = 0, cleared = 0;
   ROOMS.forEach(function (r) { var s = save.done[r.id] || 0; total += s; if (s) cleared++; if (s === 3) three++; });
-  var list = [
-    ['i-play', 'أول بوابة', 'افتح أول بوابة', cleared >= 1],
-    ['i-star', 'حل مثالي', 'احصل على 3 نجوم في غرفة', three >= 1],
-    ['i-list', 'نصف الطريق', 'أكمل 3 غرف', cleared >= 3],
-    ['i-lock', 'كاسر الختم', 'أكمل المرحلة الأولى كاملة', cleared >= ROOMS.length],
-    ['i-trophy', 'كمال', 'ثلاث نجوم في كل الغرف', three >= ROOMS.length]
+  var n = ROOMS.length, list = [
+    ['i-gem', 'أول بوابة', 'افتح أول بوابة', cleared >= 1, Math.min(cleared, 1), 1],
+    ['i-star', 'حل مثالي', 'احصل على 3 نجوم في غرفة', three >= 1, Math.min(three, 1), 1],
+    ['i-list', 'نصف الطريق', 'أكمل 3 غرف', cleared >= 3, Math.min(cleared, 3), 3],
+    ['i-lock', 'كاسر الختم', 'أكمل المرحلة الأولى كاملة', cleared >= n, cleared, n],
+    ['i-star', 'نجمة ذهبية', 'اجمع 10 نجوم', total >= 10, Math.min(total, 10), 10],
+    ['i-trophy', 'كمال', 'ثلاث نجوم في كل الغرف', three >= n, three, n]
   ];
   var got = list.filter(function (a) { return a[3]; }).length;
   $('#achSum').textContent = got + ' / ' + list.length + ' · ' + total + ' ★';
-  $('#achList').innerHTML = list.map(function (a) { return '<div class="ach' + (a[3] ? ' got' : '') + '"><span class="ic2">' + icon(a[0], '') + '</span><div><b>' + a[1] + '</b><small>' + a[2] + '</small></div></div>'; }).join('');
+  $('#achList').innerHTML = list.map(function (a) { return '<div class="ach' + (a[3] ? ' got' : '') + '"><span class="ic2">' + icon(a[0], '') + '</span><div style="flex:1"><b>' + a[1] + '</b><small>' + a[2] + '</small>' + (a[3] ? '' : '<div class="bar"><i style="width:' + Math.round(a[4] / a[5] * 100) + '%"></i></div>') + '</div></div>'; }).join('');
 }
 function openMenu() { closeSheet(); buildMenu(); hide('#pause'); hide('#clear'); show('#menu'); G.paused = true; }
 function updateMuteBtns() {
