@@ -120,14 +120,14 @@ function layout() {
   var tr = $('#top').getBoundingClientRect(), br = $('#bottom').getBoundingClientRect();
   var top = (tr.height ? tr.bottom : 64) + 6, bot = (br.height ? H - br.top : 150) + 6;
   if (G.lv) {
-    var aw = W - 16, ah = H - top - bot;
-    cs = Math.floor(Math.min(aw / (G.lv.w + 0.9), ah / (G.lv.h + 0.25 + 0.9), portrait ? 80 : 92)); cs = Math.max(cs, 18);
+    var aw = W - 6, ah = H - top - bot;
+    cs = Math.floor(Math.min(aw / (G.lv.w + 0.84), ah / (G.lv.h + 0.25 + 0.84), portrait ? 80 : 92)); cs = Math.max(cs, 18);
     dz = Math.round(cs * 0.2); fp = Math.round(cs * 0.42);
     ox = Math.round((W - cs * G.lv.w) / 2);
     oy = Math.round(top + (ah - cs * G.lv.h) / 2 + dz * 0.5);
   }
   vig = cx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.8);
-  vig.addColorStop(0, 'rgba(6,2,22,0)'); vig.addColorStop(1, 'rgba(6,2,22,.62)');
+  vig.addColorStop(0, 'rgba(6,2,22,0)'); vig.addColorStop(1, 'rgba(6,2,22,.32)');
   buildSprites(); buildStatic();
 }
 
@@ -214,7 +214,7 @@ function drawFrame(g) {
   g.fillStyle = 'rgba(255,230,160,.5)';
   studs.forEach(function (p) { g.beginPath(); g.arc(p[0], p[1], Math.max(1, cs * 0.022), 0, 7); g.fill(); });
   gemPts = [];
-  var gs = cs * 0.62;
+  var gs = cs * 0.74;
   gemPts.push({ x: x0 + ch * 0.35, y: y0 + ch * 0.35, s: gs }, { x: x0 + w - ch * 0.35, y: y0 + ch * 0.35, s: gs }, { x: x0 + ch * 0.35, y: y0 + h - ch * 0.35, s: gs }, { x: x0 + w - ch * 0.35, y: y0 + h - ch * 0.35, s: gs });
   gemPts.push({ x: x0 + fp * 0.1, y: y0 + h / 2, s: gs * 0.5 }, { x: x0 + w - fp * 0.1, y: y0 + h / 2, s: gs * 0.5 }, { x: x0 + w / 2, y: y0 + h - fp * 0.1, s: gs * 0.5 });
 }
@@ -318,7 +318,7 @@ function drawBg() {
   } else {
     var g = cx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2a1a7a'); g.addColorStop(1, '#0a0420'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
   }
-  if (!G.title) { cx.fillStyle = 'rgba(8,3,32,.34)'; cx.fillRect(0, 0, W, H); }
+  if (!G.title) { cx.fillStyle = 'rgba(8,3,32,.08)'; cx.fillRect(0, 0, W, H); }
   cx.save(); cx.globalCompositeOperation = 'lighter';
   // عمود الضوء المركزي
   var pu = 0.75 + 0.25 * Math.sin(t * 1.4), bw = W * (G.title ? 0.05 : 0.03);
@@ -813,7 +813,7 @@ function finishStep(A) {
   var step = A.steps[A.i], next = A.steps[A.i + 1];
   step.forEach(function (m) {
     A.cur.set(m.id, { x: m.tx, y: m.ty });
-    var run = (A.run.get(m.id) || 0) + 1; A.run.set(m.id, run);
+    var run = (A.run.get(m.id) || 0) + 1; A.run.set(m.id, run); AudioFX.tick(run);
     var moving = next && next.some(function (n) { return n.id === m.id; });
     if (!moving) { A.run.set(m.id, 0); land(m, run, A.g.get(m.id)); }
   });
@@ -822,9 +822,13 @@ function land(m, run, gdir) {
   var v = DIRV[gdir], c = cxy(m.tx, m.ty), px = c[0] + v[0] * cs * 0.42, py = c[1] + v[1] * cs * 0.42;
   burst(px, py, -v[0] * 40, -v[1] * 40, 14, 'rgba(240,201,112,.8)', 70);
   burst(px, py, -v[0] * 30, -v[1] * 30, 8, 'rgba(155,123,234,.9)', 60);
+  var nx = m.tx + v[0], ny = m.ty + v[1], kind = 'wall';
+  if (solidAt(nx, ny)) kind = G.lv.kind[ny * G.lv.w + nx] === 'H' ? 'gold' : 'wall';
+  else if (G.anim) G.anim.cur.forEach(function (c, id) { if (id !== m.id && c.x === nx && c.y === ny) kind = 'block'; });
+  var pw = Math.min(1, run / 5 + 0.3);
+  AudioFX.impact(kind, pw); vibrate(Math.round(12 + pw * 26));
   G.rings.push({ x: px, y: py, t: 0, col: '240,201,112' });
   G.shake = Math.max(G.shake, Math.min(9, run * 1.4 + 1.5));
-  AudioFX.land(Math.min(1, run / 6));
   var on = G.lv.plates.some(function (p) { return p.x === m.tx && p.y === m.ty; });
   if (on) setTimeout(function () { AudioFX.plate(true); }, 90);
 }

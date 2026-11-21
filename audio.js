@@ -175,6 +175,28 @@ var AudioFX = (function () {
     undo: function () { tone({ f: 600, f2: 380, dur: 0.15, vol: 0.08, type: 'triangle', lp: 2000 }); },
 
 
+
+    // ===== اصطدام الكتلة: أصوات متوسطة/عالية تُسمع على سماعة الموبايل =====
+    tick: function (n) {   // خطوة انزلاق خفيفة، تعلو نغمتها مع طول الانزلاق
+      tone({ f: 820 + Math.min(8, n) * 70, f2: 620 + Math.min(8, n) * 50, dur: 0.045, vol: 0.035, type: 'triangle' });
+    },
+    impact: function (kind, p) {
+      p = Math.max(0.25, Math.min(1, p || 0.5));
+      if (kind === 'block') {          // بلّور على بلّور: رنّة زجاجية
+        bell(1976, 0, 0.09 * p + 0.03, null, 0.5); bell(2960, 0.012, 0.06 * p, null, 0.35);
+        noise({ fc: 4200, fc2: 1800, dur: 0.06, vol: 0.06 * p + 0.02, ftype: 'bandpass', q: 1.2, attack: 0.003 });
+        tone({ f: 260, f2: 150, dur: 0.1, vol: 0.1 * p, type: 'triangle' });
+      } else if (kind === 'gold') {    // عنصر محصّن: صدمة معدنية ثقيلة
+        tone({ f: 220, f2: 90, dur: 0.18, vol: 0.2 * p + 0.06, type: 'triangle' });
+        bell(523, 0, 0.09 * p + 0.03, null, 0.9); bell(1318, 0.01, 0.05 * p, null, 0.5);
+        noise({ fc: 1800, fc2: 400, dur: 0.1, vol: 0.12 * p + 0.03, ftype: 'bandpass', q: 0.9, attack: 0.003 });
+      } else {                         // جدار حجري: ضربة + شرارة بلّورية
+        tone({ f: 190, f2: 75, dur: 0.2, vol: 0.22 * p + 0.06, type: 'triangle' });
+        tone({ f: 95, f2: 45, dur: 0.25, vol: 0.2 * p, type: 'sine' });
+        noise({ fc: 1500, fc2: 280, dur: 0.14, vol: 0.15 * p + 0.04, ftype: 'bandpass', q: 0.8, attack: 0.003 });
+        bell(1568, 0.005, 0.06 * p + 0.02, null, 0.45); bell(2349, 0.015, 0.035 * p, null, 0.3);
+      }
+    },
     // ===== مشهد فتح البوابة =====
     cineCharge: function () {   // دمدمة صاعدة + صفير طاقة
       noise({ fc: 70, fc2: 260, dur: 1.3, vol: 0.12, attack: 0.9 });
