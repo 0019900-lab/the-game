@@ -1,7 +1,7 @@
 /* LAWLESS — Service Worker: يعمل بدون إنترنت، ويحدّث نفسه في الخلفية.
    غيّر رقم VERSION عند كل إصدار جديد لإجبار التحديث. */
-var VERSION = 'lawless-v2';
-var ASSETS = ['./', './index.html', './sim.js', './rooms.js', './audio.js', './game.js', './manifest.json',
+var VERSION = 'lawless-v3';
+var ASSETS = ['./', './index.html', './sim.js', './rooms.js', './audio.js', './game.js', './manifest.json', './assets/bg.jpg', './assets/logo.webp', './assets/btn-start.webp', './assets/emblem.webp',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/icon-180.png'];
 
 self.addEventListener('install', function (e) {

@@ -174,6 +174,43 @@ var AudioFX = (function () {
     },
     undo: function () { tone({ f: 600, f2: 380, dur: 0.15, vol: 0.08, type: 'triangle', lp: 2000 }); },
 
+
+    // ===== مشهد فتح البوابة =====
+    cineCharge: function () {   // دمدمة صاعدة + صفير طاقة
+      noise({ fc: 70, fc2: 260, dur: 1.3, vol: 0.12, attack: 0.9 });
+      tone({ f: 55, f2: 110, dur: 1.3, vol: 0.14, attack: 0.9 });
+      tone({ f: 330, f2: 1650, dur: 1.2, vol: 0.05, attack: 0.9, lp: 3000 });
+      tone({ f: 495, f2: 2480, dur: 1.2, vol: 0.03, attack: 0.9, lp: 3200 });
+    },
+    crack: function () {
+      noise({ fc: 3200, fc2: 900, dur: 0.22, vol: 0.07, ftype: 'bandpass', attack: 0.012 });
+      tone({ f: 1900, f2: 700, dur: 0.18, vol: 0.04, lp: 3500 });
+      tone({ f: 70, f2: 50, dur: 0.3, vol: 0.12 });
+    },
+    boom: function () {
+      tone({ f: 80, f2: 28, dur: 1.5, vol: 0.34, attack: 0.008 });
+      tone({ f: 160, f2: 55, dur: 0.7, vol: 0.14, attack: 0.008 });
+      noise({ fc: 2600, fc2: 90, dur: 1.3, vol: 0.2, attack: 0.012 });
+      noise({ fc: 5000, fc2: 700, dur: 0.6, vol: 0.05, ftype: 'bandpass', attack: 0.01 });
+      [0, 7, 12, 19].forEach(function (iv, i) { bell(hz(64 + iv), 0.08 + i * 0.07, 0.06, null, 2.6); });
+    },
+    crumble: function (gold, far) {   // تفتّت حجر
+      far = Math.max(0, Math.min(1, far || 0));
+      var f = (gold ? 420 : 260) * (0.8 + Math.random() * 0.5);
+      noise({ fc: 1500 * (1 - far * 0.4), fc2: 160, dur: 0.3 + Math.random() * 0.15, vol: 0.075 * (1 - far * 0.35), attack: 0.01, pan: (Math.random() - 0.5) * 0.8 });
+      tone({ f: f, f2: f * 0.35, dur: 0.16, vol: 0.05, type: 'triangle', lp: 1400, pan: (Math.random() - 0.5) * 0.8 });
+      if (gold) tone({ f: 1800 + Math.random() * 900, dur: 0.25, vol: 0.02 });
+    },
+    shatter: function () {   // تكسّر بلّور
+      for (var i = 0; i < 4; i++) tone({ f: 1800 + Math.random() * 2600, dur: 0.18 + Math.random() * 0.2, vol: 0.03, at: i * 0.025, pan: (Math.random() - 0.5) * 0.9 });
+      noise({ fc: 6500, fc2: 2500, dur: 0.25, vol: 0.035, ftype: 'bandpass', attack: 0.008 });
+      tone({ f: 210, f2: 90, dur: 0.2, vol: 0.09 });
+    },
+    absorb: function (i) {   // رنّة امتصاص صاعدة على السلم الخماسي
+      var n = 76 + PENT[((i | 0) % 5)] + 12 * (((i | 0) / 5) | 0 > 1 ? 1 : 0);
+      bell(hz(n), 0, 0.045, null, 0.9);
+    },
+
     // أجواء: Pad ناعم من موجات جيبية/مثلثية فقط + أجراس خماسية متباعدة
     ambience: function (root) {
       if (!ac) return;
