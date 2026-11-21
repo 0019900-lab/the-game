@@ -7,7 +7,7 @@ ROOMS.forEach((r, i) => {
   const w = r.map[0].length;
   if (!r.map.every(row => row.length === w)) { console.log(`✗ ${r.id}: صفوف غير متساوية`); bad++; return; }
   const lv = Sim.load(r);
-  const sol = Sim.solve(lv, 14);
+  const sol = Sim.solve(lv, 16);
   if (!sol) { console.log(`✗ ${r.id} ${r.name}: بلا حل`); bad++; return; }
   const ok = sol.path.length === r.par;
   if (!ok) bad++;
