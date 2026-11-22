@@ -10,7 +10,7 @@
   function load(room) {
     var h = room.map.length, w = room.map[0].length;
     var solid = new Uint8Array(w * h), kind = new Array(w * h).fill('.');
-    var blocks = [], plates = [], gates = [];
+    var blocks = [], plates = [], gates = [], attr = null;
     for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
       var c = room.map[y][x] || '#';
       if (c === '#' || c === 'H' || c === 'E') {
@@ -18,8 +18,9 @@
         if (c === 'E') gates.push({ x: x, y: y });
       } else if (c === 'B') blocks.push({ id: blocks.length, x: x, y: y, g: 'down' });
       else if (c === 'P') plates.push({ x: x, y: y });
+      else if (c === 'O') attr = { x: x, y: y };
     }
-    var lv = { w: w, h: h, solid: solid, kind: kind, plates: plates, gates: gates };
+    var lv = { w: w, h: h, solid: solid, kind: kind, plates: plates, gates: gates, attr: attr };
     lv.start = simulate(lv, blocks).blocks; // استقرار أولي
     return lv;
   }
@@ -32,7 +33,15 @@
       cur.forEach(function (b) { occ.set(b.y * w + b.x, b.id); });
       var moves = new Map();
       cur.forEach(function (b) {
-        var d = DIRS[b.g], nx = b.x + d[0], ny = b.y + d[1];
+        var d, nx, ny;
+        if (b.g === 'pull') {   // ATTRACTION: خطوة نحو المغناطيس، المحور الأبعد أولًا
+          if (!lv.attr) return;
+          var ax = lv.attr.x - b.x, ay = lv.attr.y - b.y; if (!ax && !ay) return;
+          var hx = Math.abs(ax) >= Math.abs(ay), cand = hx ? [[Math.sign(ax), 0], [0, Math.sign(ay)]] : [[0, Math.sign(ay)], [Math.sign(ax), 0]], ok = false;
+          for (var ci = 0; ci < 2; ci++) { var cd = cand[ci]; if (!cd[0] && !cd[1]) continue; var tx2 = b.x + cd[0], ty2 = b.y + cd[1]; if (tx2 >= 0 && ty2 >= 0 && tx2 < w && ty2 < h && !lv.solid[ty2 * w + tx2]) { d = cd; ok = true; break; } }
+          if (!ok) return;
+        } else d = DIRS[b.g];
+        nx = b.x + d[0]; ny = b.y + d[1];
         if (nx < 0 || ny < 0 || nx >= w || ny >= h || lv.solid[ny * w + nx]) return;
         moves.set(b.id, { id: b.id, fx: b.x, fy: b.y, tx: nx, ty: ny });
       });
@@ -72,16 +81,16 @@
   function key(bs) { return bs.map(function (b) { return b.x + ',' + b.y + ',' + b.g[0]; }).join('|'); }
 
   // BFS: أقصر سلسلة أفعال (كتلة + اتجاه) تحل الغرفة. تعيد null إن لم يوجد حل.
-  function solve(lv, maxDepth) {
-    maxDepth = maxDepth || 12;
+  function solve(lv, maxDepth, opt) {
+    maxDepth = maxDepth || 12; var names = (lv.attr && !(opt && opt.noPull)) ? NAMES.concat(['pull']) : NAMES;
     var start = clone(lv.start);
     if (solved(lv, start)) return { path: [], states: 1, dead: 0 };
     var seen = new Set([key(start)]), q = [{ b: start, path: [] }], best = null, states = 1;
     while (q.length) {
       var cur = q.shift();
       if (cur.path.length >= maxDepth) continue;
-      for (var i = 0; i < cur.b.length; i++) for (var d = 0; d < 4; d++) {
-        var dir = NAMES[d];
+      for (var i = 0; i < cur.b.length; i++) for (var d = 0; d < names.length; d++) {
+        var dir = names[d];
         if (cur.b[i].g === dir) continue;
         var plan = {}; plan[i] = dir;
         var res = simulate(lv, applyPlan(cur.b, plan));
