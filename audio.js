@@ -43,7 +43,7 @@ var AudioFX = (function () {
     master = ac.createGain(); master.gain.value = muted ? 0 : 1;
     bus.connect(hp); hp.connect(lp); lp.connect(lim); lim.connect(sat); sat.connect(master); master.connect(ac.destination);
 
-    var verb = ac.createConvolver(); verb.buffer = impulse(1.7);
+    var verb = ac.createConvolver(); verb.buffer = impulse(1.0);
     var vf = ac.createBiquadFilter(); vf.type = 'lowpass'; vf.frequency.value = 3800; vf.Q.value = 0.4;
     var wet = ac.createGain(); wet.gain.value = 0.28;
     verb.connect(vf); vf.connect(wet); wet.connect(bus);
@@ -129,6 +129,9 @@ var AudioFX = (function () {
     select: function () {
       tone({ f: 880, f2: 1250, dur: 0.1, vol: 0.1 });
       tone({ f: 1760, dur: 0.14, vol: 0.035, at: 0.03 });
+    },
+    hint: function (st) {
+      if (!ac) return; var f = st === 1 ? 784 : 988; bell(hz ? f : f, 0, 0.1, sfx, 1.2); bell(f * 1.5, 0.09, 0.07, sfx, 1.2);
     },
     dir: function (d) {
       var now = ac ? ac.currentTime : 0; if (now - lastDir < 0.05) return; lastDir = now;
