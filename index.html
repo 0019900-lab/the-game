@@ -256,6 +256,21 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
 .lvNode.boss .hx{width:68px;height:68px}
 .lvNode.lock{opacity:.55;filter:grayscale(.6)}
 .lvNode .ss{display:flex;gap:1px}.lvNode .ss svg{width:12px;height:12px;fill:rgba(255,255,255,.15);stroke:none}.lvNode .ss svg.on{fill:#ffd978;filter:drop-shadow(0 0 4px #ffd978)}
+
+#levels[data-w="1"] .lvNode .hx{clip-path:circle(50%);border-radius:50%}
+#levels[data-w="1"] .lvNode .hx::after{content:'';position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 8%,rgba(255,226,140,.95) 9% 11%,transparent 12% 24%,rgba(255,226,140,.95) 25% 27%,transparent 28% 49%,rgba(255,226,140,.95) 50% 52%,transparent 53% 74%,rgba(255,226,140,.95) 75% 77%,transparent 78%);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%)}
+#levels[data-w="2"] .lvNode .hx{clip-path:polygon(12% 0,60% 6%,100% 0,94% 45%,100% 100%,50% 94%,0 100%,6% 52%);background:linear-gradient(160deg,#c8742a,#4a1e08)}
+#levels[data-w="2"] .lvNode .hx::before{background:linear-gradient(160deg,#3a1a12,#120605)}
+#levels[data-w="2"] .lvNode.done .hx{background:linear-gradient(160deg,#ffd9a8,#ff7a2a 55%,#8a2a08)}
+#levels[data-w="2"] .lvNode.done .hx::before{background:linear-gradient(160deg,rgba(255,110,40,.85),#2a0d08 75%)}
+#levels[data-w="2"] .lvNode.cur .hx{animation:lvcur 1s ease-in-out infinite}
+#levels[data-w="3"] .lvNode .hx{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);width:62px;height:62px;background:linear-gradient(160deg,#dff6ff,#5a7aa8)}
+#levels[data-w="3"] .lvNode .hx::before{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);inset:4px;background:linear-gradient(160deg,#102a5a,#080a28)}
+#levels[data-w="3"] .lvNode.done .hx{background:linear-gradient(160deg,#fff,#6fe3f2 50%,#ff7ae8)}
+#levels[data-w="3"] .lvNode.done .hx::before{background:linear-gradient(160deg,rgba(111,227,242,.7),#140a45 75%)}
+#levels[data-w="3"] .lvNode.boss .hx{width:76px;height:76px}
+#levels[data-w="2"] .lvLine .flow{stroke-dasharray:2 10;stroke-width:4px}
+#levels[data-w="3"] .lvLine .flow{stroke-dasharray:1 14;stroke-linecap:round;stroke-width:5px}
 .lvNode em{font:normal 600 9.5px var(--sans);letter-spacing:.4px;color:rgba(255,244,214,.85);text-shadow:0 1px 6px #000;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis}
 #toast,#hint{z-index:40}
 </style>

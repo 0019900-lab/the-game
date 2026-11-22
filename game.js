@@ -236,31 +236,38 @@ function rebuildLayers(rects) {
 function solidAt(x, y) { var lv = G.lv; return x >= 0 && y >= 0 && x < lv.w && y < lv.h && lv.solid[y * lv.w + x] === 1; }
 function alive(x, y) { return solidAt(x, y) && !G.gone[y * G.lv.w + x]; }
 
+var FR = {
+  1: { fill: ['#7c63c8', '#4a3590', '#2a1a62'], m: ['#fff0b8', '#e9b84e', '#a8741f', '#f0c970'], glow: '138,92,240', ln: 'rgba(240,201,112,.55)', st: 'rgba(255,230,160,.5)' },
+  2: { fill: ['#6a4a3e', '#35211c', '#160b09'], m: ['#ffd9a8', '#d9833a', '#7a3a12', '#f0a860'], glow: '255,110,30', ln: 'rgba(255,150,70,.55)', st: 'rgba(255,170,90,.55)' },
+  3: { fill: ['#5a7fb8', '#2a4488', '#101a4c'], m: ['#f4fdff', '#a8cdee', '#5a7aa8', '#dff0ff'], glow: '110,230,255', ln: 'rgba(170,235,255,.55)', st: 'rgba(200,245,255,.6)' }
+};
+function FRt() { return FR[(G.world && G.world.id) || 1]; }
 function drawFrame(g) {
+  var F = FRt();
   var lv = G.lv, x0 = ox - fp, y0 = oy - dz - fp, w = lv.w * cs + 2 * fp, h = lv.h * cs + dz + 2 * fp, ch = cs * 0.42;
   function path(ix) {
     var a = x0 + ix, b = y0 + ix, c = x0 + w - ix, d = y0 + h - ix, q = Math.max(0, ch - ix);
     g.beginPath(); g.moveTo(a + q, b); g.lineTo(c - q, b); g.lineTo(c, b + q); g.lineTo(c, d - q); g.lineTo(c - q, d); g.lineTo(a + q, d); g.lineTo(a, d - q); g.lineTo(a, b + q); g.closePath();
   }
-  g.save(); g.shadowColor = 'rgba(138,92,240,.85)'; g.shadowBlur = cs * 0.7; path(0); g.fillStyle = '#1a0d44'; g.fill(); g.restore();
-  var gr = g.createLinearGradient(x0, y0, x0 + w, y0 + h); gr.addColorStop(0, '#7c63c8'); gr.addColorStop(0.5, '#4a3590'); gr.addColorStop(1, '#2a1a62');
+  g.save(); g.shadowColor = 'rgba(' + F.glow + ',.85)'; g.shadowBlur = cs * 0.7; path(0); g.fillStyle = '#1a0d44'; g.fill(); g.restore();
+  var gr = g.createLinearGradient(x0, y0, x0 + w, y0 + h); gr.addColorStop(0, F.fill[0]); gr.addColorStop(0.5, F.fill[1]); gr.addColorStop(1, F.fill[2]);
   path(0); g.fillStyle = gr; g.fill();
-  var gold = g.createLinearGradient(x0, y0, x0, y0 + h); gold.addColorStop(0, '#fff0b8'); gold.addColorStop(0.35, '#e9b84e'); gold.addColorStop(0.7, '#a8741f'); gold.addColorStop(1, '#f0c970');
+  var gold = g.createLinearGradient(x0, y0, x0, y0 + h); gold.addColorStop(0, F.m[0]); gold.addColorStop(0.35, F.m[1]); gold.addColorStop(0.7, F.m[2]); gold.addColorStop(1, F.m[3]);
   path(1); g.strokeStyle = gold; g.lineWidth = Math.max(2.5, cs * 0.075); g.stroke();
-  path(cs * 0.17); g.strokeStyle = 'rgba(240,201,112,.55)'; g.lineWidth = 1.2; g.stroke();
+  path(cs * 0.17); g.strokeStyle = F.ln; g.lineWidth = 1.2; g.stroke();
   path(fp - 2); g.strokeStyle = 'rgba(0,0,0,.5)'; g.lineWidth = 2; g.stroke();
   var studs = [], n, i;
   n = lv.w * 2; for (i = 1; i < n; i++) { var sx = x0 + w * i / n; studs.push([sx, y0 + fp * 0.38], [sx, y0 + h - fp * 0.38]); }
   n = lv.h * 2; for (i = 1; i < n; i++) { var sy = y0 + h * i / n; studs.push([x0 + fp * 0.38, sy], [x0 + w - fp * 0.38, sy]); }
-  g.fillStyle = 'rgba(255,230,160,.5)';
+  g.fillStyle = F.st;
   studs.forEach(function (p) { g.beginPath(); g.arc(p[0], p[1], Math.max(1, cs * 0.022), 0, 7); g.fill(); });
   function orn(ox2, oy2, rot) {
     var d = cs * 0.15; g.save(); g.translate(ox2, oy2); g.rotate(rot);
     g.shadowColor = 'rgba(255,200,90,.9)'; g.shadowBlur = cs * 0.14;
     g.beginPath(); g.moveTo(0, -d * 1.5); g.lineTo(d, 0); g.lineTo(0, d * 1.5); g.lineTo(-d, 0); g.closePath();
-    var og = g.createLinearGradient(0, -d, 0, d); og.addColorStop(0, '#fff0b8'); og.addColorStop(0.5, '#e9b84e'); og.addColorStop(1, '#9a6618'); g.fillStyle = og; g.fill(); g.shadowBlur = 0;
+    var og = g.createLinearGradient(0, -d, 0, d); og.addColorStop(0, F.m[0]); og.addColorStop(0.5, F.m[1]); og.addColorStop(1, F.m[2]); g.fillStyle = og; g.fill(); g.shadowBlur = 0;
     g.strokeStyle = 'rgba(60,30,0,.6)'; g.lineWidth = 1; g.stroke();
-    g.beginPath(); g.moveTo(0, -d * 0.6); g.lineTo(d * 0.4, 0); g.lineTo(0, d * 0.6); g.lineTo(-d * 0.4, 0); g.closePath(); g.fillStyle = '#7a4bff'; g.fill(); g.restore();
+    g.beginPath(); g.moveTo(0, -d * 0.6); g.lineTo(d * 0.4, 0); g.lineTo(0, d * 0.6); g.lineTo(-d * 0.4, 0); g.closePath(); g.fillStyle = (G.world && G.world.id === 2) ? '#ff4a1a' : (G.world && G.world.id === 3) ? '#38e0ff' : '#7a4bff'; g.fill(); g.restore();
   }
   for (i = 3; i < lv.w; i += 3) { var ox2 = x0 + fp + i * cs; orn(ox2, y0 + fp * 0.5, 0); orn(ox2, y0 + h - fp * 0.5, 0); }
   for (i = 3; i < lv.h; i += 3) { var oy2 = y0 + fp + dz + i * cs; orn(x0 + fp * 0.5, oy2, 0); orn(x0 + w - fp * 0.5, oy2, 0); }
@@ -270,16 +277,31 @@ function drawFrame(g) {
   gemPts.push({ x: x0 + fp * 0.1, y: y0 + h / 2, s: gs * 0.5 }, { x: x0 + w - fp * 0.1, y: y0 + h / 2, s: gs * 0.5 }, { x: x0 + w / 2, y: y0 + h - fp * 0.1, s: gs * 0.5 });
 }
 function drawFrameGems(g) {
-  gemPts.forEach(function (p) {
-    var s = p.s;
-    g.save(); g.translate(p.x, p.y); g.shadowColor = 'rgba(160,110,255,.9)'; g.shadowBlur = s * 0.6;
-    var gold = g.createLinearGradient(0, -s * 1.4, 0, s * 1.4); gold.addColorStop(0, '#fff0b8'); gold.addColorStop(0.5, '#c88a2a'); gold.addColorStop(1, '#f0c970');
-    g.fillStyle = gold;
-    [[0, 1], [Math.PI / 2, 0.85], [Math.PI, 1], [-Math.PI / 2, 0.85]].forEach(function (a) {
-      g.save(); g.rotate(a[0] + Math.PI / 4); g.beginPath(); g.moveTo(0, -s * 1.5 * a[1]); g.lineTo(s * 0.2, -s * 0.3); g.lineTo(0, 0); g.lineTo(-s * 0.2, -s * 0.3); g.closePath(); g.fill(); g.restore();
-    });
-    [[0, -1.55], [0, 1.55], [-1.55, 0], [1.55, 0]].forEach(function (p2) { g.beginPath(); g.moveTo(p2[0] * s, p2[1] * s); g.lineTo(p2[0] * s * 0.65 + p2[1] * s * 0.12, p2[1] * s * 0.65 + p2[0] * s * 0.12); g.lineTo(p2[0] * s * 0.65 - p2[1] * s * 0.12, p2[1] * s * 0.65 - p2[0] * s * 0.12); g.closePath(); g.fill(); });
-    g.shadowBlur = 0; facetGem(g, 0, 0, s, ['#f1e8ff', '#8a5cf0', '#2c1a9a']);
+  var wid = (G.world && G.world.id) || 1, F = FRt();
+  gemPts.forEach(function (p, pi) {
+    var s = p.s, big = s > cs * 0.5;
+    g.save(); g.translate(p.x, p.y); g.shadowColor = 'rgba(' + F.glow + ',.9)'; g.shadowBlur = s * 0.6;
+    var mg = g.createLinearGradient(0, -s * 1.4, 0, s * 1.4); mg.addColorStop(0, F.m[0]); mg.addColorStop(0.5, F.m[2]); mg.addColorStop(1, F.m[3]);
+    g.fillStyle = mg;
+    if (wid === 2) {   // شظايا سبج مسنّنة + قلب حمم
+      var sp = [[-2.3, 1.7], [-1.6, 1.1], [-0.9, 1.6], [-0.2, 1.05], [0.6, 1.75], [1.3, 1.1], [2.1, 1.65], [2.8, 1.15], [3.6, 1.7], [4.4, 1.1]];
+      g.fillStyle = '#1b0e0b'; g.strokeStyle = F.m[1]; g.lineWidth = Math.max(1, s * 0.05);
+      sp.forEach(function (a) { g.save(); g.rotate(a[0] + pi); g.beginPath(); g.moveTo(0, -s * a[1]); g.lineTo(s * 0.2, -s * 0.35); g.lineTo(-s * 0.2, -s * 0.35); g.closePath(); g.fill(); g.stroke(); g.restore(); });
+      g.beginPath(); g.arc(0, 0, s * 0.85, 0, 7); g.fillStyle = mg; g.fill();
+      g.shadowBlur = 0; facetGem(g, 0, 0, s * 0.95, ['#ffd9a0', '#ff4a1a', '#6a0a05']);
+    } else if (wid === 3) {   // حلقات فضية + بلورة سيان ومدارية
+      g.strokeStyle = mg; g.lineWidth = Math.max(1.5, s * 0.09);
+      g.beginPath(); g.ellipse(0, 0, s * 1.5, s * 0.55, 0.6, 0, 7); g.stroke(); g.beginPath(); g.ellipse(0, 0, s * 1.4, s * 0.45, -0.6, 0, 7); g.stroke();
+      g.shadowBlur = 0; facetGem(g, 0, 0, s * 1.05, ['#f4fdff', '#46d8f0', '#2a2ab0']);
+      if (big) { facetGem(g, s * 1.25, -s * 0.7, s * 0.32, ['#ffd0f4', '#ff7ae8', '#8a1a9a']); facetGem(g, -s * 1.25, s * 0.7, s * 0.32, ['#ffd0f4', '#ff7ae8', '#8a1a9a']); }
+    } else {   // عنقود أميثست بإطار ذهبي
+      [[0, 1], [Math.PI / 2, 0.85], [Math.PI, 1], [-Math.PI / 2, 0.85]].forEach(function (a) {
+        g.save(); g.rotate(a[0] + Math.PI / 4); g.beginPath(); g.moveTo(0, -s * 1.5 * a[1]); g.lineTo(s * 0.2, -s * 0.3); g.lineTo(0, 0); g.lineTo(-s * 0.2, -s * 0.3); g.closePath(); g.fill(); g.restore();
+      });
+      [[0, -1.55], [0, 1.55], [-1.55, 0], [1.55, 0]].forEach(function (p2) { g.beginPath(); g.moveTo(p2[0] * s, p2[1] * s); g.lineTo(p2[0] * s * 0.65 + p2[1] * s * 0.12, p2[1] * s * 0.65 + p2[0] * s * 0.12); g.lineTo(p2[0] * s * 0.65 - p2[1] * s * 0.12, p2[1] * s * 0.65 - p2[0] * s * 0.12); g.closePath(); g.fill(); });
+      g.shadowBlur = 0; facetGem(g, 0, 0, s, ['#f1e8ff', '#8a5cf0', '#2c1a9a']);
+      if (big) { facetGem(g, s * 0.8, s * 0.55, s * 0.3, ['#f1e8ff', '#a98cff', '#3a2aa0']); facetGem(g, -s * 0.8, s * 0.55, s * 0.3, ['#f1e8ff', '#a98cff', '#3a2aa0']); }
+    }
     g.restore();
   });
 }
@@ -1260,6 +1282,17 @@ function wmLayout() {
   var n = ROOMS.worlds.length + 1, top = 110, bot = wm.H - 50, step = Math.min(210, (bot - top) / (n - 0.4)), R = Math.min(wm.W * 0.16, step * 0.34, 64);
   wm.nodes = []; for (var i = 0; i < n; i++) wm.nodes.push({ i: i, x: wm.W * (i % 2 ? 0.7 : 0.3), y: top + R + i * step, R: R });
 }
+var EMI = {};
+function emImg(id, lit) {
+  var k = id + (lit ? 'l' : 'd'); if (EMI[k] !== undefined) return EMI[k];
+  var src = lit ? EMI['s' + id] : EMI['s' + (id <= 3 ? id : 0)];
+  if (!src) { var im = new Image(); im.src = 'assets/w' + (id <= 3 ? id : 0) + '.webp'; EMI['s' + (id <= 3 ? id : 0)] = im; src = im; }
+  if (!src.complete || !src.naturalWidth) return null;
+  if (lit) { EMI[k] = src; return src; }
+  var c = document.createElement('canvas'); c.width = src.naturalWidth; c.height = src.naturalHeight; var cg = c.getContext('2d');
+  cg.drawImage(src, 0, 0); cg.globalCompositeOperation = 'source-atop'; cg.fillStyle = 'rgba(8,4,22,.9)'; cg.fillRect(0, 0, c.width, c.height);
+  EMI[k] = c; return c;
+}
 function drawWorldEmblem(g, nd, t, open) {
   var R = nd.R, x = nd.x, y = nd.y + Math.sin(t * 1.1 + nd.i * 1.7) * 5, id = nd.i + 1, C = WC[id];
   g.save(); g.translate(x, y);
@@ -1267,35 +1300,17 @@ function drawWorldEmblem(g, nd, t, open) {
     var fg = g.createRadialGradient(0, 0, 0, 0, 0, R * 1.2); fg.addColorStop(0, 'rgba(14,8,32,.95)'); fg.addColorStop(0.7, 'rgba(10,5,26,.85)'); fg.addColorStop(1, 'rgba(10,5,26,0)');
     g.fillStyle = fg; g.beginPath(); g.arc(0, 0, R * 1.2, 0, 7); g.fill();
     g.strokeStyle = 'rgba(120,100,170,.25)'; g.lineWidth = 2; g.setLineDash([6, 8]); g.beginPath(); g.arc(0, 0, R * 0.9, t * 0.1, t * 0.1 + 7); g.stroke(); g.setLineDash([]);
+    var di = emImg(id, false); if (di) { var dw2 = R * 3.0, dh2 = dw2 * di.height / di.width; g.drawImage(di, -dw2 / 2, -dh2 * 0.55, dw2, dh2); }
     g.fillStyle = 'rgba(150,130,200,.35)'; g.font = '700 ' + R * 0.8 + 'px Georgia,serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 0, 2);
     g.restore(); return;
   }
   var gl = g.createRadialGradient(0, 0, R * 0.2, 0, 0, R * 2); gl.addColorStop(0, 'rgba(' + C.a + ',.38)'); gl.addColorStop(0.5, 'rgba(' + C.b + ',.15)'); gl.addColorStop(1, 'rgba(' + C.a + ',0)');
   g.globalCompositeOperation = 'lighter'; g.fillStyle = gl; g.beginPath(); g.arc(0, 0, R * 2, 0, 7); g.fill(); g.globalCompositeOperation = 'source-over';
-  if (id === 1) {   // جزيرة عائمة بشلال وبلورة
-    var rg = g.createLinearGradient(0, 0, 0, R * 1.2); rg.addColorStop(0, '#5a4a9a'); rg.addColorStop(1, '#1c1240');
-    g.fillStyle = rg; g.beginPath(); g.moveTo(-R * 0.95, -R * 0.05); g.quadraticCurveTo(-R * 0.7, R * 0.5, -R * 0.15, R * 1.15); g.lineTo(R * 0.1, R * 1.3); g.quadraticCurveTo(R * 0.6, R * 0.6, R * 0.95, -R * 0.05); g.closePath(); g.fill();
-    var tg = g.createLinearGradient(0, -R * 0.4, 0, R * 0.1); tg.addColorStop(0, '#9a86e8'); tg.addColorStop(1, '#4a3a9a'); g.fillStyle = tg; g.beginPath(); g.ellipse(0, -R * 0.05, R * 0.95, R * 0.28, 0, 0, 7); g.fill();
-    g.fillStyle = 'rgba(160,240,255,' + (0.55 + 0.25 * Math.sin(t * 4)) + ')'; g.fillRect(R * 0.5, R * 0.05, R * 0.07, R * 0.95);
-    g.save(); g.shadowColor = 'rgba(150,100,255,1)'; g.shadowBlur = R * 0.5;
-    [[-0.3, -0.1, 0.5], [0.05, -0.15, 0.78], [0.34, -0.08, 0.42]].forEach(function (c, k) { var bx = c[0] * R, by = c[1] * R, hh2 = c[2] * R; g.fillStyle = k === 1 ? '#d8c8ff' : '#a98cff'; g.beginPath(); g.moveTo(bx - R * 0.11, by); g.lineTo(bx, by - hh2); g.lineTo(bx + R * 0.11, by); g.closePath(); g.fill(); });
-    g.restore();
-  } else if (id === 2) {   // أرض متشققة بشق حمم متوهج
-    var lv = 0.5 + 0.5 * Math.sin(t * 2.5);
-    g.save(); g.shadowColor = 'rgba(255,120,30,' + (0.6 + 0.3 * lv) + ')'; g.shadowBlur = R * 0.7; g.strokeStyle = 'rgba(255,170,60,' + (0.8 + 0.2 * lv) + ')'; g.lineWidth = R * 0.1; g.beginPath(); g.moveTo(-R * 0.05, -R * 0.95); g.lineTo(R * 0.1, -R * 0.35); g.lineTo(-R * 0.12, R * 0.1); g.lineTo(R * 0.06, R * 0.7); g.stroke(); g.restore();
-    var l1 = g.createLinearGradient(-R, 0, 0, 0); l1.addColorStop(0, '#2c2220'); l1.addColorStop(1, '#6a5650');
-    g.fillStyle = l1; g.beginPath(); g.moveTo(-R * 0.95, -R * 0.55); g.lineTo(-R * 0.08, -R * 0.95); g.lineTo(R * 0.06, -R * 0.35); g.lineTo(-R * 0.16, R * 0.1); g.lineTo(R * 0.02, R * 0.7); g.lineTo(-R * 0.6, R * 0.95); g.lineTo(-R * 1.0, R * 0.2); g.closePath(); g.fill();
-    var l2 = g.createLinearGradient(0, 0, R, 0); l2.addColorStop(0, '#6a5650'); l2.addColorStop(1, '#2c2220');
-    g.fillStyle = l2; g.save(); g.translate(R * 0.08, -R * 0.02 + Math.sin(t * 1.5) * 2); g.beginPath(); g.moveTo(R * 0.06, -R * 0.95); g.lineTo(R * 0.9, -R * 0.45); g.lineTo(R * 0.95, R * 0.3); g.lineTo(R * 0.4, R * 0.9); g.lineTo(R * 0.0, R * 0.7); g.lineTo(-R * 0.04, R * 0.1); g.lineTo(R * 0.0, -R * 0.35); g.closePath(); g.fill(); g.restore();
-  } else {   // فراغ ساحب: بلورة مركزية ومدارات
-    g.save(); g.strokeStyle = 'rgba(' + C.a + ',.55)'; g.lineWidth = 2; g.rotate(t * 0.5); g.beginPath(); g.ellipse(0, 0, R * 1.25, R * 0.45, 0.4, 0, 7); g.stroke(); g.restore();
-    g.save(); g.strokeStyle = 'rgba(' + C.b + ',.45)'; g.lineWidth = 1.6; g.rotate(-t * 0.4); g.beginPath(); g.ellipse(0, 0, R * 1.05, R * 0.34, -0.5, 0, 7); g.stroke(); g.restore();
-    g.save(); g.shadowColor = 'rgba(' + C.a + ',1)'; g.shadowBlur = R * 0.6;
-    var cg = g.createLinearGradient(-R * 0.3, -R, R * 0.3, R); cg.addColorStop(0, '#f4fdff'); cg.addColorStop(0.5, '#6fe3f2'); cg.addColorStop(1, '#7a5cff'); g.fillStyle = cg;
-    g.beginPath(); g.moveTo(0, -R * 0.95); g.lineTo(R * 0.4, -R * 0.2); g.lineTo(R * 0.26, R * 0.7); g.lineTo(0, R * 0.95); g.lineTo(-R * 0.26, R * 0.7); g.lineTo(-R * 0.4, -R * 0.2); g.closePath(); g.fill(); g.restore();
-    g.fillStyle = 'rgba(255,255,255,.45)'; g.beginPath(); g.moveTo(0, -R * 0.95); g.lineTo(R * 0.4, -R * 0.2); g.lineTo(0, 0); g.closePath(); g.fill();
-    for (var k = 0; k < 4; k++) { var a = t * 0.9 + k * 1.571, ox2 = Math.cos(a) * R * 1.15, oy2 = Math.sin(a) * R * 0.4; g.fillStyle = k % 2 ? '#ff7ae8' : '#8ff0ff'; g.beginPath(); g.moveTo(ox2, oy2 - R * 0.15); g.lineTo(ox2 + R * 0.08, oy2); g.lineTo(ox2, oy2 + R * 0.15); g.lineTo(ox2 - R * 0.08, oy2); g.closePath(); g.fill(); }
-  }
+  var im = emImg(id, true), bob = Math.sin(t * 1.3 + id) * 0.03;
+  if (im) { var iw = R * 3.0, ih = iw * im.height / im.width; g.save(); g.rotate(bob); g.drawImage(im, -iw / 2, -ih * 0.55, iw, ih); g.restore(); }
+  if (id === 2) { for (var q = 0; q < 5; q++) { var ph = (t * 0.5 + q * 0.37) % 1; g.fillStyle = 'rgba(255,170,60,' + (0.8 * (1 - ph)) + ')'; g.beginPath(); g.arc((q - 2) * R * 0.4 + Math.sin(t + q) * 6, R * 0.1 - ph * R * 1.3, 2.2, 0, 7); g.fill(); } }
+  else if (id === 3) { for (var q2 = 0; q2 < 4; q2++) { var a2 = t * 0.8 + q2 * 1.571; wmPart(g, 'void', Math.cos(a2) * R * 1.35, Math.sin(a2) * R * 0.5, 0.8, 3.5, q2 % 2 ? '255,122,232' : '143,240,255', t, q2); } }
+  else { for (var q3 = 0; q3 < 4; q3++) { var a3 = t * 0.6 + q3 * 1.571; wmPart(g, 'star', Math.cos(a3) * R * 1.35, Math.sin(a3) * R * 0.45 - R * 0.2, 0.7, 3, '240,220,150', t, q3); } }
   g.restore();
 }
 function wmPart(g, type, x, y, a, size, col, t, k) {
@@ -1371,7 +1386,7 @@ function closeWorlds() { wm.on = false; cancelAnimationFrame(wm.raf); hide('#wor
 function worldAt(px, py) { var best = -1; wm.nodes.forEach(function (n, i) { if (Math.hypot(px - n.x, py - n.y) < n.R * 1.35) best = i; }); return best; }
 function openLevels(wi, from) {
   var wd = ROOMS.worlds[wi], C = WC[wi + 1], box = $('#lvPath'); lvFrom = from || lvFrom;
-  $('#levels').style.setProperty('--wa', C.a); $('#levels').style.setProperty('--wb', C.b);
+  $('#levels').dataset.w = wi + 1; $('#levels').style.setProperty('--wa', C.a); $('#levels').style.setProperty('--wb', C.b);
   $('#lvBg').style.backgroundImage = 'url(' + wd.bg + ')';
   $('#lvName').textContent = wd.name; var st = worldStats(wi); $('#lvSub').textContent = wd.ar + ' · ★ ' + st.s + ' / ' + st.n * 3;
   var rooms = []; ROOMS.forEach(function (r, i) { if (r.w === wi) rooms.push(i); });
