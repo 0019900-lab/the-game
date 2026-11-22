@@ -202,7 +202,27 @@ function buildSprites() {
   });
   rr(g, x, y, s, s, r); g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = Math.max(1.2, s * 0.03); g.stroke();
   SP.block = c; SP.size = size; SP.pad = pad;
-  SP.haloP = halo('138,92,240', cs * 3); SP.haloC = halo('111,227,242', cs * 3); SP.haloG = halo('240,201,112', cs * 3); SP.haloD = halo('150,130,205', cs * 3); SP.haloW = halo('255,255,255', cs * 3);
+  SP.haloP = halo('138,92,240', cs * 3); SP.haloC = halo('111,227,242', cs * 3); SP.haloG = halo('240,201,112', cs * 3); SP.haloD = halo('150,130,205', cs * 3); SP.haloW = halo('255,255,255', cs * 3); SP.haloE = halo('255,140,40', cs * 2);
+  (function () {   // ثقب أسود: ذراع قرص تراكم + نواة
+    var S = Math.ceil(cs * 3.4 * DPR), R0 = S / 2, a = mk(S, S), ag = a.getContext('2d'); ag.translate(R0, R0);
+    for (var arm = 0; arm < 4; arm++) {
+      ag.save(); ag.rotate(arm * 1.5708);
+      for (var q = 0; q < 46; q++) {
+        var u = q / 46, rr0 = R0 * (0.2 + u * 0.78), an = u * 2.3, x = Math.cos(an) * rr0, y = Math.sin(an) * rr0, w = R0 * (0.075 * (1 - u * 0.7)), al = (1 - u) * 0.85;
+        var cc = u < 0.3 ? '255,235,170' : u < 0.62 ? '190,130,255' : '90,210,255';
+        var rg = ag.createRadialGradient(x, y, 0, x, y, w * 2.2); rg.addColorStop(0, 'rgba(' + cc + ',' + al + ')'); rg.addColorStop(1, 'rgba(' + cc + ',0)');
+        ag.fillStyle = rg; ag.beginPath(); ag.arc(x, y, w * 2.2, 0, 7); ag.fill();
+      }
+      ag.restore();
+    }
+    SP.bhArms = a;
+    var c2 = mk(S, S), g2 = c2.getContext('2d'); g2.translate(R0, R0); var Rc = cs * 0.3 * DPR;
+    var hg = g2.createRadialGradient(0, 0, Rc * 0.9, 0, 0, Rc * 2.1); hg.addColorStop(0, 'rgba(255,200,120,.9)'); hg.addColorStop(0.25, 'rgba(190,120,255,.5)'); hg.addColorStop(1, 'rgba(120,80,255,0)'); g2.fillStyle = hg; g2.beginPath(); g2.arc(0, 0, Rc * 2.1, 0, 7); g2.fill();
+    g2.fillStyle = '#000'; g2.beginPath(); g2.arc(0, 0, Rc, 0, 7); g2.fill();
+    g2.strokeStyle = 'rgba(255,236,190,.95)'; g2.lineWidth = Math.max(1.5, Rc * 0.1); g2.shadowColor = 'rgba(255,190,90,1)'; g2.shadowBlur = Rc * 0.6; g2.beginPath(); g2.arc(0, 0, Rc * 1.04, 0, 7); g2.stroke();
+    g2.shadowBlur = 0; g2.strokeStyle = 'rgba(255,255,255,.55)'; g2.lineWidth = Math.max(1, Rc * 0.06); g2.beginPath(); g2.ellipse(0, 0, Rc * 1.75, Rc * 0.42, -0.35, 0, 7); g2.stroke();
+    SP.bhCore = c2; SP.bhS = S / DPR;
+  })(); SP.haloH = halo('255,225,150', cs * 2);
 }
 
 /* ---------- طبقات ثابتة (مقصوصة على اللوح) ---------- */
@@ -603,11 +623,22 @@ function drawField() {
   });
   cx.restore();
 }
+function hsh(n) { var x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+function drawEmber(i, t, bw, bh) {   // جمرة حقيقية: دورة حياة فردية، انجراف رياح، وميض، وذيل
+  var per = 3.5 + hsh(i) * 5, off = hsh(i + 50) * per, tt = t + off, cyc = Math.floor(tt / per), ph = (tt % per) / per, sd = hsh(i * 3 + cyc * 17), sz = hsh(i * 5 + cyc * 11);
+  var rise = bh * (0.35 + sd * 0.7), wind = cs * (0.5 + hsh(i + 9) * 1.2);
+  function pos(p) { return [ox + hsh(i * 7 + cyc * 13) * bw + Math.sin(tt * (1.2 + sz) + i) * cs * 0.22 * p + wind * p * p, oy + bh - Math.pow(p, 0.8) * rise]; }
+  var P = pos(ph), P0 = pos(Math.max(0, ph - 0.03)), fade = Math.sin(Math.min(1, ph) * Math.PI), fl = 0.75 + 0.25 * Math.sin(t * (14 + sz * 10) + i * 3), r = cs * (0.035 + sz * 0.05) * (1 - ph * 0.5);
+  cx.lineCap = 'round'; cx.strokeStyle = 'rgba(255,' + (90 + (1 - ph) * 110 | 0) + ',30,' + 0.5 * fade * fl + ')'; cx.lineWidth = r * 1.4; cx.beginPath(); cx.moveTo(P0[0], P0[1]); cx.lineTo(P[0], P[1]); cx.stroke();
+  glow(SP.haloE, P[0], P[1], r * 9, 0.55 * fade * fl);
+  glow(SP.haloH, P[0], P[1], r * 3.2, 0.95 * fade * fl * (1 - ph * 0.6));
+}
 function drawAmbient() {
-  var T = TH(), lv = G.lv, t = G.t, N = Math.round(20 * fxk()), bw = lv.w * cs, bh = lv.h * cs, at = lv.attr, i;
+  var T = TH(), lv = G.lv, t = G.t, N = Math.round(24 * fxk()), bw = lv.w * cs, bh = lv.h * cs, at = lv.attr, i;
   if (N < 2) return;
   cx.save(); cx.globalCompositeOperation = 'lighter';
   for (i = 0; i < N; i++) {
+    if (T.amb === 'ember') { drawEmber(i, t, bw, bh); continue; }
     var sd = (i * 7919) % 1000 / 1000, sd2 = (i * 104729) % 1000 / 1000, x, y, a, r;
     if (T.amb === 'ember') { var ph = (t * (0.12 + sd * 0.1) + sd2) % 1; x = ox + sd * bw + Math.sin(t * 1.3 + i) * cs * 0.3; y = oy + bh - ph * bh; a = Math.sin(ph * Math.PI) * 0.85; r = cs * (0.03 + sd2 * 0.03); cx.fillStyle = 'rgba(255,' + (140 + sd * 90 | 0) + ',60,' + a + ')'; }
     else if (T.amb === 'void' && at) { var ph2 = (t * 0.08 + sd2) % 1, a0 = sd * 6.283, d0 = Math.max(bw, bh) * 0.55 * (1 - ph2), ac = cxy(at.x, at.y); x = ac[0] + Math.cos(a0 + ph2 * 4) * d0; y = ac[1] + Math.sin(a0 + ph2 * 4) * d0; a = Math.sin(ph2 * Math.PI) * 0.7; r = cs * 0.035; cx.fillStyle = (i % 2 ? 'rgba(110,230,255,' : 'rgba(220,130,255,') + a + ')'; }
@@ -629,25 +660,29 @@ function drawAmbient() {
 }
 function drawAttractor() {
   var at = G.lv.attr; if (!at) return;
-  var c = cxy(at.x, at.y), t = G.t, R = cs * 0.34, pull = G.law === 'pull' ? 1 : 0.55;
-  cx.save(); cx.globalCompositeOperation = 'lighter'; glow(SP.haloP, c[0], c[1], cs * (3 + 0.3 * Math.sin(t * 2)), 0.5 * pull + 0.15); cx.restore();
-  cx.save(); cx.translate(c[0], c[1]);
-  cx.save(); cx.globalCompositeOperation = 'lighter'; cx.lineCap = 'round';
-  for (var k = 0; k < 3; k++) {
-    cx.save(); cx.rotate(t * (1.2 + pull * 0.8) + k * 2.094); cx.beginPath();
-    for (var q = 0; q < 18; q++) { var rr5 = R * (0.35 + q * 0.055), aa = q * 0.22; cx.lineTo(Math.cos(aa) * rr5, Math.sin(aa) * rr5); }
-    cx.strokeStyle = k % 2 ? 'rgba(110,230,255,' + 0.55 * pull + ')' : 'rgba(190,130,255,' + 0.7 * pull + ')'; cx.lineWidth = Math.max(1.4, cs * 0.045); cx.stroke(); cx.restore();
-  }
+  var c = cxy(at.x, at.y), t = G.t, pull = G.law === 'pull' ? 1 : 0.6, S = SP.bhS * 1.0;
+  cx.save(); cx.globalCompositeOperation = 'lighter'; glow(SP.haloP, c[0], c[1], cs * (3.2 + 0.3 * Math.sin(t * 2)), 0.5 * pull + 0.15);
+  cx.translate(c[0], c[1]);
+  cx.rotate(t * (0.9 + pull * 0.7)); cx.globalAlpha = 0.55 + 0.4 * pull; cx.drawImage(SP.bhArms, -S / 2, -S / 2, S, S);
+  cx.rotate(-t * (1.9 + pull * 1.4)); cx.globalAlpha = 0.4 * pull + 0.15; cx.scale(0.72, 0.72); cx.drawImage(SP.bhArms, -S / 2, -S / 2, S, S);
   cx.restore();
-  var dg = cx.createRadialGradient(0, 0, 0, 0, 0, R * 0.8); dg.addColorStop(0, '#000'); dg.addColorStop(0.7, '#08021c'); dg.addColorStop(1, 'rgba(8,2,28,0)');
-  cx.fillStyle = dg; cx.beginPath(); cx.arc(0, 0, R * 0.85, 0, 7); cx.fill();
-  cx.strokeStyle = 'rgba(255,225,150,.75)'; cx.lineWidth = Math.max(1.5, cs * 0.04); cx.beginPath(); cx.arc(0, 0, R * 0.42, 0, 7); cx.stroke();
+  cx.save(); cx.translate(c[0], c[1]); cx.drawImage(SP.bhCore, -S / 2, -S / 2, S, S);
   cx.globalCompositeOperation = 'lighter';
-  for (var i = 0; i < 8; i++) { var ph = (t * 0.6 + i / 8) % 1, rr6 = R * (2.2 - ph * 1.9), a6 = i * 0.785 + t * 0.5; cx.fillStyle = 'rgba(200,170,255,' + (0.7 * ph * pull) + ')'; cx.beginPath(); cx.arc(Math.cos(a6) * rr6, Math.sin(a6) * rr6, Math.max(1, cs * 0.025), 0, 7); cx.fill(); }
+  for (var i = 0; i < 8; i++) { var ph = (t * 0.6 + i / 8) % 1, rr6 = cs * 0.34 * (2.4 - ph * 2.1), a6 = i * 0.785 + t * 0.5; cx.fillStyle = 'rgba(210,180,255,' + (0.8 * ph * pull) + ')'; cx.beginPath(); cx.arc(Math.cos(a6) * rr6, Math.sin(a6) * rr6, Math.max(1, cs * 0.03), 0, 7); cx.fill(); }
   cx.restore();
-  if (G.law === 'pull' && G.sel >= 0 && G.mode === 'planning' && G.blocks[G.sel]) {
-    var b = G.blocks[G.sel], bc = cxy(b.x, b.y);
-    cx.save(); cx.setLineDash([cs * 0.15, cs * 0.15]); cx.lineDashOffset = -t * cs * 0.8; cx.strokeStyle = 'rgba(190,150,255,.55)'; cx.lineWidth = 1.5; cx.beginPath(); cx.moveTo(bc[0], bc[1]); cx.lineTo(c[0], c[1]); cx.stroke(); cx.restore();
+  if (G.law === 'pull' && G.mode === 'planning') {
+    var sel = G.sel >= 0 ? G.blocks[G.sel] : null;
+    if (sel) {   // خط سحب بسهم متدفق نحو الثقب
+      var bc = cxy(sel.x, sel.y), dx = c[0] - bc[0], dy = c[1] - bc[1], L = Math.hypot(dx, dy) || 1, ang = Math.atan2(dy, dx);
+      cx.save(); cx.globalCompositeOperation = 'lighter'; cx.lineCap = 'round'; cx.lineJoin = 'round';
+      var sp = cs * 0.55, off = (t * cs * 1.6) % sp;
+      for (var d = off + cs * 0.45; d < L - cs * 0.45; d += sp) { var px = bc[0] + dx / L * d, py = bc[1] + dy / L * d; cx.save(); cx.translate(px, py); cx.rotate(ang); cx.strokeStyle = 'rgba(200,160,255,' + (0.9 * Math.sin(d / L * Math.PI)) + ')'; cx.lineWidth = Math.max(2, cs * 0.06); cx.beginPath(); cx.moveTo(-cs * 0.1, -cs * 0.13); cx.lineTo(cs * 0.06, 0); cx.lineTo(-cs * 0.1, cs * 0.13); cx.stroke(); cx.restore(); }
+      cx.restore();
+    } else {   // لا اختيار: نبض حول الكتل يدعو للّمس
+      cx.save(); cx.globalCompositeOperation = 'lighter';
+      G.blocks.forEach(function (b2) { var p2 = cxy(b2.x, b2.y), k2 = (t * 0.9) % 1; cx.strokeStyle = 'rgba(200,160,255,' + 0.6 * (1 - k2) + ')'; cx.lineWidth = 2; rr(cx, p2[0] - cs * (0.43 + k2 * 0.18), p2[1] - cs * (0.43 + k2 * 0.18), cs * (0.86 + k2 * 0.36), cs * (0.86 + k2 * 0.36), cs * 0.2); cx.stroke(); });
+      cx.restore();
+    }
   }
 }
 function drawGhosts() {
@@ -1277,7 +1312,7 @@ function worldOpen(i) { if (i === 0) return true; var pw = ROOMS.worlds[i - 1], 
 function worldStats(i) { var n = 0, s = 0, d = 0; ROOMS.forEach(function (r) { if (r.w === i) { n++; s += save.done[r.id] || 0; if (save.done[r.id]) d++; } }); return { n: n, s: s, d: d }; }
 function lerpC(a, b, k) { var A = a.split(','), B = b.split(','); return A.map(function (v, i) { return Math.round(+v + (+B[i] - +v) * k); }).join(','); }
 function wmLayout() {
-  var cv = wm.cv; wm.dpr = Math.min(1.5, window.devicePixelRatio || 1); wm.bgc = null; wm.W = window.innerWidth; wm.H = window.innerHeight;
+  var cv = wm.cv; wm.dpr = Math.min(1.25, window.devicePixelRatio || 1); wm.plates = null; wm.bgc = null; wm.W = window.innerWidth; wm.H = window.innerHeight;
   cv.width = wm.W * wm.dpr; cv.height = wm.H * wm.dpr; cv.style.width = wm.W + 'px'; cv.style.height = wm.H + 'px';
   var n = ROOMS.worlds.length + 1, top = 110, bot = wm.H - 50, step = Math.min(210, (bot - top) / (n - 0.4)), R = Math.min(wm.W * 0.16, step * 0.34, 64);
   wm.nodes = []; for (var i = 0; i < n; i++) wm.nodes.push({ i: i, x: wm.W * (i % 2 ? 0.7 : 0.3), y: top + R + i * step, R: R });
@@ -1288,9 +1323,12 @@ function emImg(id, lit) {
   var src = lit ? EMI['s' + id] : EMI['s' + (id <= 3 ? id : 0)];
   if (!src) { var im = new Image(); im.src = 'assets/w' + (id <= 3 ? id : 0) + '.webp'; EMI['s' + (id <= 3 ? id : 0)] = im; src = im; }
   if (!src.complete || !src.naturalWidth) return null;
-  if (lit) { EMI[k] = src; return src; }
-  var c = document.createElement('canvas'); c.width = src.naturalWidth; c.height = src.naturalHeight; var cg = c.getContext('2d');
-  cg.drawImage(src, 0, 0); cg.globalCompositeOperation = 'source-atop'; cg.fillStyle = 'rgba(8,4,22,.9)'; cg.fillRect(0, 0, c.width, c.height);
+  var w = src.naturalWidth, h = src.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h; var cg = c.getContext('2d');
+  cg.drawImage(src, 0, 0);
+  if (!lit) { cg.globalCompositeOperation = 'source-atop'; cg.fillStyle = 'rgba(8,4,22,.9)'; cg.fillRect(0, 0, w, h); }
+  cg.globalCompositeOperation = 'destination-in'; cg.save(); cg.translate(w / 2, h / 2); cg.scale(1, h / w);
+  var mg = cg.createRadialGradient(0, 0, w * 0.26, 0, 0, w * 0.5); mg.addColorStop(0, 'rgba(0,0,0,1)'); mg.addColorStop(0.72, 'rgba(0,0,0,.85)'); mg.addColorStop(1, 'rgba(0,0,0,0)');
+  cg.fillStyle = mg; cg.fillRect(-w / 2, -w / 2, w, w); cg.restore();
   EMI[k] = c; return c;
 }
 function drawWorldEmblem(g, nd, t, open) {
@@ -1315,12 +1353,28 @@ function drawWorldEmblem(g, nd, t, open) {
 }
 function wmPart(g, type, x, y, a, size, col, t, k) {
   g.fillStyle = 'rgba(' + col + ',' + a + ')';
-  if (type === 'ember') { g.beginPath(); g.arc(x, y, size * (0.8 + 0.3 * Math.sin(t * 20 + k)), 0, 7); g.fill(); }
+  if (type === 'ember') { var fl = 0.8 + 0.3 * Math.sin(t * 20 + k * 3); g.beginPath(); g.arc(x, y, size * 2.2 * fl, 0, 7); g.fillStyle = 'rgba(255,120,30,' + a * 0.25 + ')'; g.fill(); g.beginPath(); g.arc(x, y, size * 0.8 * fl, 0, 7); g.fillStyle = 'rgba(255,230,160,' + a + ')'; g.fill(); }
   else if (type === 'void') { g.beginPath(); g.moveTo(x, y - size * 1.4); g.lineTo(x + size * 0.7, y); g.lineTo(x, y + size * 1.4); g.lineTo(x - size * 0.7, y); g.closePath(); g.fill(); }
   else { g.beginPath(); g.moveTo(x, y - size * 1.5); g.lineTo(x + size * 0.35, y - size * 0.35); g.lineTo(x + size * 1.5, y); g.lineTo(x + size * 0.35, y + size * 0.35); g.lineTo(x, y + size * 1.5); g.lineTo(x - size * 0.35, y + size * 0.35); g.lineTo(x - size * 1.5, y); g.lineTo(x - size * 0.35, y - size * 0.35); g.closePath(); g.fill(); }
 }
+function wmPlate(i, open, nw) {
+  var w = Math.min(158, wm.W * 0.42), h = i < nw && open ? 70 : 52, c = document.createElement('canvas'), S = 2; c.width = w * S; c.height = h * S; var g = c.getContext('2d'); g.scale(S, S);
+  var C = i < nw ? WC[i + 1] : null, ac = open && C ? C.a : '150,130,200';
+  function rp(x, y, ww, hh, r) { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + ww - r, y); g.quadraticCurveTo(x + ww, y, x + ww, y + r); g.lineTo(x + ww, y + hh - r); g.quadraticCurveTo(x + ww, y + hh, x + ww - r, y + hh); g.lineTo(x + r, y + hh); g.quadraticCurveTo(x, y + hh, x, y + hh - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); }
+  g.shadowColor = 'rgba(' + ac + ',.5)'; g.shadowBlur = open ? 10 : 0; rp(3, 3, w - 6, h - 6, 12);
+  var bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, 'rgba(46,24,104,.93)'); bg.addColorStop(1, 'rgba(14,6,40,.93)'); g.fillStyle = bg; g.fill(); g.shadowBlur = 0;
+  var bd = g.createLinearGradient(0, 0, w, h); bd.addColorStop(0, open ? '#fff0b8' : '#6a5a90'); bd.addColorStop(0.5, open ? '#c8902e' : '#40346a'); bd.addColorStop(1, open ? '#f0c970' : '#6a5a90'); g.strokeStyle = bd; g.lineWidth = 1.6; g.stroke();
+  [[3, h / 2], [w - 3, h / 2]].forEach(function (p) { g.save(); g.translate(p[0], p[1]); g.rotate(0.785); g.fillStyle = open ? '#f0c970' : '#5a4a80'; g.fillRect(-3.2, -3.2, 6.4, 6.4); g.restore(); });
+  g.textAlign = 'center'; var cx0 = w / 2;
+  if (i < nw) {
+    var st = worldStats(i); g.fillStyle = open ? 'rgb(' + ac + ')' : 'rgba(170,150,210,.6)'; g.font = '700 12.5px Georgia,serif'; g.fillText(ROOMS.worlds[i].name, cx0, 20);
+    g.fillStyle = open ? '#fff4d6' : 'rgba(170,150,210,.55)'; g.font = '12px system-ui,sans-serif'; g.fillText(open ? ROOMS.worlds[i].ar : 'مغلق', cx0, 37);
+    if (open) { var pw = w - 40, pr = st.n ? st.d / st.n : 0; g.fillStyle = 'rgba(255,255,255,.12)'; rp(20, 45, pw, 6, 3); g.fill(); var pg = g.createLinearGradient(20, 0, 20 + pw, 0); pg.addColorStop(0, 'rgb(' + C.a + ')'); pg.addColorStop(1, 'rgb(' + C.b + ')'); g.fillStyle = pg; if (pr > 0) { rp(20, 45, Math.max(6, pw * pr), 6, 3); g.fill(); } g.fillStyle = 'rgba(255,244,214,.9)'; g.font = '11px system-ui,sans-serif'; g.fillText(st.d + '/' + st.n + '  ·  ★ ' + st.s + '/' + st.n * 3, cx0, 63); }
+  } else { g.fillStyle = 'rgba(170,150,210,.6)'; g.font = '700 13px Georgia,serif'; g.fillText('? ? ?', cx0, 22); g.font = '12px system-ui,sans-serif'; g.fillText('عالم مجهول', cx0, 39); }
+  return { c: c, w: w, h: h, open: open };
+}
 function wmDraw(ts) {
-  if (!wm.on) return; wm.raf = requestAnimationFrame(wmDraw);
+  if (!wm.on) return; wm.raf = requestAnimationFrame(wmDraw); if (ts - (wm.last || 0) < 30) return; wm.last = ts;
   var g = wm.g, t = ts / 1000, W = wm.W, H = wm.H, i, k;
   g.setTransform(wm.dpr, 0, 0, wm.dpr, 0, 0);
   var bgi = bgFor('assets/bg.jpg');
@@ -1338,15 +1392,14 @@ function wmDraw(ts) {
     var both = worldOpen(i + 1) && i + 1 < nw, cA = WC[i + 1].a, cB = both ? WC[i + 2].a : cA, ay = A.y + A.R * 0.95, by = B.y - B.R * 0.95, dy = by - ay, lim = both ? 1 : 0.42;
     var pt = function (s) { var u = 1 - s; return [u * u * u * A.x + 3 * u * u * s * A.x + 3 * u * s * s * B.x + s * s * s * B.x, u * u * u * ay + 3 * u * u * s * (ay + dy * 0.5) + 3 * u * s * s * (by - dy * 0.5) + s * s * s * by]; };
     g.save(); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
-    for (k = 0; k < 24; k++) {
-      var s0 = k / 24 * lim, s1 = (k + 1) / 24 * lim, p0 = pt(s0), p1 = pt(s1), col = lerpC(cA, cB, both ? k / 24 : 0), fa = both ? 1 : Math.pow(1 - k / 24, 1.4), wv = 1 + 0.25 * Math.sin(t * 3 - k * 0.4);
+    for (k = 0; k < 14; k++) {
+      var s0 = k / 14 * lim, s1 = (k + 1) / 14 * lim, p0 = pt(s0), p1 = pt(s1), col = lerpC(cA, cB, both ? k / 14 : 0), fa = both ? 1 : Math.pow(1 - k / 14, 1.4), wv = 1 + 0.25 * Math.sin(t * 3 - k * 0.4);
       g.strokeStyle = 'rgba(' + col + ',' + 0.16 * fa + ')'; g.lineWidth = 22 * wv; g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
-      g.strokeStyle = 'rgba(' + col + ',' + 0.55 * fa + ')'; g.lineWidth = 7 * wv; g.stroke();
-      g.strokeStyle = 'rgba(255,255,255,' + 0.5 * fa + ')'; g.lineWidth = 2; g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,' + 0.55 * fa + ')'; g.lineWidth = 4 * wv; g.stroke();
     }
     var tA = WC[i + 1].t, tB = both ? WC[i + 2].t : tA;
-    for (k = 0; k < 18; k++) {
-      var s = ((t * 0.16 + k / 18) % 1) * lim, p = pt(s), sw = Math.sin(t * 2 + k * 2.3) * 14 * (tA === 'void' || tB === 'void' ? 1.6 : 1), ty = (both && s > 0.5) ? tB : tA, cc = lerpC(cA, cB, both ? s : 0), fa2 = both ? Math.sin(Math.min(1, s) * Math.PI) : (1 - s / lim);
+    for (k = 0; k < 12; k++) {
+      var s = ((t * 0.16 + k / 12) % 1) * lim, p = pt(s), sw = Math.sin(t * 2 + k * 2.3) * 14 * (tA === 'void' || tB === 'void' ? 1.6 : 1), ty = (both && s > 0.5) ? tB : tA, cc = lerpC(cA, cB, both ? s : 0), fa2 = both ? Math.sin(Math.min(1, s) * Math.PI) : (1 - s / lim);
       wmPart(g, ty, p[0] + sw, p[1], 0.9 * Math.max(0, fa2), 2 + (k % 3), cc, t, k);
     }
     g.restore();
@@ -1358,23 +1411,19 @@ function wmDraw(ts) {
     if (open) {   // جسيمات خاصة بالعالم حول أيقونته
       var C = WC[i + 1]; g.save(); g.globalCompositeOperation = 'lighter';
       for (k = 0; k < 12; k++) {
-        var sd = (k * 7919 % 100) / 100, ph = (t * (0.15 + sd * 0.1) + sd * 3) % 1, px, py;
-        if (C.t === 'ember') { px = nd.x + (sd - 0.5) * nd.R * 1.6; py = nd.y + nd.R * 0.6 - ph * nd.R * 2.4; }
+        var sd = hsh(k * 3.7 + i * 19), ph = (t * (0.12 + sd * 0.14) + hsh(k + 40 + i) * 5) % 1, px, py;
+        if (C.t === 'ember') { px = nd.x + (hsh(k * 1.3 + i) - 0.5) * nd.R * 2 + Math.sin(t * 1.5 + k) * 5 * ph + ph * ph * nd.R * 0.5; py = nd.y + nd.R * 0.6 - Math.pow(ph, 0.8) * nd.R * 2.4; }
         else if (C.t === 'void') { var a = t * 0.8 + k * 0.52; px = nd.x + Math.cos(a) * nd.R * (1.2 + sd * 0.5); py = nd.y + Math.sin(a) * nd.R * (0.5 + sd * 0.3); ph = 0.5; }
         else { px = nd.x + (sd - 0.5) * nd.R * 2.2 + Math.sin(t + k) * 6; py = nd.y + nd.R * 0.3 - ph * nd.R * 2; }
         wmPart(g, C.t, px, py, 0.85 * Math.sin(ph * Math.PI), 1.6 + sd * 2, k % 2 ? C.b : C.a, t, k);
       }
       g.restore();
     }
-    // الأسماء
-    g.save(); var st = i < nw ? worldStats(i) : null, left = i % 2 === 0, lx = left ? nd.x + nd.R * 1.45 : nd.x - nd.R * 1.45, nmY = nd.y - 4;
-    g.textAlign = left ? 'left' : 'right'; g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 8;
-    if (i < nw) {
-      g.fillStyle = open ? 'rgba(' + WC[i + 1].a + ',1)' : 'rgba(170,150,210,.55)'; g.font = '700 13px Georgia,serif'; g.fillText(ROOMS.worlds[i].name, lx, nmY);
-      g.fillStyle = open ? '#fff4d6' : 'rgba(170,150,210,.5)'; g.font = '12px system-ui,sans-serif'; g.fillText(open ? ROOMS.worlds[i].ar : (ROOMS.worlds[i].soon ? 'قريبًا' : 'مغلق'), lx, nmY + 17);
-      if (open) { g.fillStyle = 'rgba(255,244,214,.8)'; g.fillText(st.d + '/' + st.n + ' مرحلة · ★ ' + st.s + '/' + st.n * 3, lx, nmY + 34); }
-    } else { g.fillStyle = 'rgba(150,130,200,.5)'; g.font = '700 13px Georgia,serif'; g.fillText('? ? ?', lx, nmY); g.font = '12px system-ui,sans-serif'; g.fillText('عالم مجهول', lx, nmY + 17); }
-    g.restore();
+    // لوحات الأسماء (مرسومة مسبقًا)
+    if (!wm.plates) wm.plates = [];
+    var pl = wm.plates[i]; if (!pl || pl.open !== open) pl = wm.plates[i] = wmPlate(i, open, nw);
+    var left = i % 2 === 0, plx = left ? nd.x + nd.R * 1.5 : nd.x - nd.R * 1.5 - pl.w;
+    g.drawImage(pl.c, plx, nd.y - pl.h / 2 - 2, pl.w, pl.h);
   }
 }
 function openWorlds(from) {
@@ -1425,11 +1474,10 @@ function placeSheet() {
   s.style.left = Math.max(8, Math.min(window.innerWidth - sw - 8, r.left + r.width / 2 - sw / 2)) + 'px'; s.style.bottom = Math.round(window.innerHeight - r.top + 12) + 'px';
 }
 function updateLawSheet() {
-  var has = !!(G.lv && G.lv.attr), a = $('#lawSheet [data-law=attraction]'), g = $('#lawSheet [data-law=gravity]');
+  var has = !!(G.lv && G.lv.attr), a = $('#lawSheet [data-law=attraction]'), gr = $('#lawSheet [data-law=gravity]');
   a.classList.toggle('lock', !has);
   a.querySelector('small').textContent = has ? 'اضغط على كتلة لتنجذب نحو المغناطيس' : 'يُفتح في THE PULLING VOID';
-  var tag = function (el, on, lockd) { var t = el.querySelector('.st'), l = el.querySelector('svg.sm'); if (lockd) { if (t) t.remove(); if (!l) el.insertAdjacentHTML('beforeend', icon('i-lock')); } else { if (l) l.remove(); if (!t) el.insertAdjacentHTML('beforeend', '<span class="st"></span>'); el.querySelector('.st').textContent = on ? 'ACTIVE' : ''; } };
-  tag(g, G.law !== 'pull', false); tag(a, G.law === 'pull', !has);
+  gr.classList.toggle('on', G.law !== 'pull'); a.classList.toggle('on', G.law === 'pull' && has);
   $('#lawName').textContent = G.law === 'pull' ? 'ATTRACTION' : 'GRAVITY'; $('#lawName').classList.toggle('long', G.law === 'pull');
 }
 function openSheet() { placeSheet(); $('#lawSheet').classList.add('open'); $('#scrim').classList.add('show'); AudioFX.activate(); refreshUI(); }
@@ -1538,7 +1586,7 @@ $$('#lawSheet .lawBtn').forEach(function (b) {
   b.onclick = function () {
     if (b.classList.contains('lock')) { AudioFX.locked(); toast('هذا القانون يُفتح في مرحلة لاحقة'); return; }
     AudioFX.select(); G.law = b.dataset.law === 'attraction' ? 'pull' : 'gravity'; closeSheet();
-    if (G.law === 'pull') toast('ATTRACTION نشط: اضغط على كتلة لتنجذب نحو المغناطيس');
+    if (G.law === 'pull') toast('ATTRACTION: المس كتلة لتنجذب نحو الثقب الأسود، والسهم يوضّح الاتجاه');
     else toast(G.sel < 0 ? 'GRAVITY نشط: اختر كتلة ثم اتجاه الجاذبية' : 'GRAVITY نشط: اختر اتجاهًا');
   };
 });
@@ -1585,5 +1633,12 @@ requestAnimationFrame(frame);
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js').catch(function () {}); });
 }
+(function () {
+  var done = false, imgs = $$('#intro img'), bgi = bgFor('assets/bg.jpg');
+  function go() { if (done) return; done = true; requestAnimationFrame(function () { $('#intro').classList.remove('pre'); }); }
+  var left = 0; imgs.concat ? 0 : 0;
+  Array.prototype.slice.call(imgs).concat([bgi]).forEach(function (im) { if (im.complete && im.naturalWidth) return; left++; var f = function () { if (--left <= 0) go(); }; im.addEventListener('load', f); im.addEventListener('error', f); });
+  if (!left) go(); setTimeout(go, 1600);
+})();
 window.__lawless = { info: function () { return { ox: ox, oy: oy, cs: cs, dz: dz, w: G.lv.w, h: G.lv.h }; }, G: G, loadRoom: loadRoom, runSim: runSim, setDir: setDir, select: select, update: update, draw: draw, openSheet: openSheet, closeSheet: closeSheet, showClear: showClear, startCine: startCine, enterGame: enterGame, layout: layout };
 })();

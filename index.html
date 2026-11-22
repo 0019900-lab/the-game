@@ -109,18 +109,24 @@ button.hex:active{transform:scale(.95)}
 #lawSheet{position:absolute;z-index:6;left:12px;bottom:100px;width:min(90vw,330px);display:flex;flex-direction:column;gap:7px;padding:12px;border-radius:22px;background:linear-gradient(160deg,rgba(58,34,120,.98),rgba(20,10,52,.98));border:2px solid var(--gold);box-shadow:0 24px 70px rgba(0,0,0,.7),0 0 50px rgba(138,92,240,.35),inset 0 0 0 1px rgba(255,240,184,.25);transform-origin:50% 100%;transform:scale(.85) translateY(16px);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,1.3,.4,1),opacity .18s}
 #lawSheet.open{transform:none;opacity:1;pointer-events:auto}
 #lawSheet h4{margin:2px 6px 2px;font:700 11px var(--serif);letter-spacing:3.5px;color:var(--gold)}
-.lawBtn{display:flex;align-items:center;gap:12px;padding:9px 12px 9px 9px;border-radius:16px;border:1px solid rgba(240,201,112,.28);background:rgba(255,255,255,.04);text-align:left;direction:ltr;transition:.15s;width:100%}
-.lawBtn:active{transform:scale(.97)}
-.lawBtn .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none}
-.lawBtn .nm{flex:1;min-width:0;font:700 13px var(--serif);letter-spacing:1.8px;line-height:1.35}
-.lawBtn .nm small{display:block;font:400 11px var(--sans);letter-spacing:0;color:var(--muted);unicode-bidi:plaintext;text-align:left}
-.lawBtn .st{font:700 10px var(--serif);letter-spacing:1px;color:var(--cyan);flex:none}
-.lawBtn[data-law=gravity]{border-color:var(--gold);background:rgba(138,92,240,.2)}
-.lawBtn[data-law=gravity] .ico{color:#d6c6ff;background:rgba(138,92,240,.35);box-shadow:0 0 18px rgba(138,92,240,.7)}
-.lawBtn[data-law=attraction] .ico{color:#9fe9f2;background:rgba(111,227,242,.12)}
-.lawBtn[data-law=reflection] .ico{color:#f2dc9c;background:rgba(240,201,112,.12)}
-.lawBtn.lock{opacity:.55}
-.lawBtn.lock .st{color:var(--muted)}
+.lawBtn{position:relative;display:flex;align-items:center;gap:12px;padding:8px 12px 8px 8px;border-radius:18px;border:1.5px solid rgba(240,201,112,.25);background:linear-gradient(120deg,rgba(255,255,255,.05),rgba(255,255,255,.01));text-align:left;direction:ltr;width:100%;opacity:0;transform:translateY(14px) scale(.92);transition:transform .3s cubic-bezier(.2,1.4,.4,1),opacity .2s,border-color .2s,box-shadow .2s,background .2s}
+#lawSheet.open .lawBtn{opacity:1;transform:none}
+#lawSheet.open .lawBtn:nth-of-type(1){transition-delay:.04s}#lawSheet.open .lawBtn:nth-of-type(2){transition-delay:.11s}#lawSheet.open .lawBtn:nth-of-type(3){transition-delay:.18s}
+#lawSheet.open .lawBtn:active{transform:scale(.95);transition-delay:0s}
+.lawBtn .li{width:62px;height:auto;flex:none;filter:saturate(.55) brightness(.75);transition:filter .25s,transform .25s}
+.lawBtn .nm{flex:1;min-width:0;font:700 13px var(--serif);letter-spacing:1.8px;line-height:1.35;color:#d9cdf5}
+.lawBtn .nm small{display:block;font:400 11px var(--sans);letter-spacing:0;color:var(--muted);unicode-bidi:plaintext;text-align:left;margin-top:2px}
+.lawBtn .st{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1.5px solid rgba(240,201,112,.3);color:transparent;font-size:14px}
+.lawBtn.on{border-color:var(--gold);background:linear-gradient(120deg,rgba(138,92,240,.38),rgba(240,201,112,.1));box-shadow:0 0 22px rgba(138,92,240,.55),inset 0 0 0 1px rgba(255,240,184,.3)}
+.lawBtn.on .li{filter:drop-shadow(0 0 8px rgba(190,150,255,.9));animation:liFloat 2.4s ease-in-out infinite}
+.lawBtn.on .nm{color:#fff4d6}
+.lawBtn.on .st{background:linear-gradient(160deg,#fff0b8,#e9b84e);border-color:#fff0b8;color:#3a2408;box-shadow:0 0 12px rgba(240,201,112,.8)}
+.lawBtn.on .st::after{content:"✓";font-weight:800}
+.lawBtn.lock{opacity:.6}
+.lawBtn.lock .li{filter:grayscale(.9) brightness(.5)}
+.lawBtn.lock .st::after{content:"🔒";font-size:12px;color:#fff}
+#lawSheet.open .lawBtn.lock{opacity:.6}
+@keyframes liFloat{50%{transform:translateY(-3px) scale(1.05)}}
 
 /* بورتريه: صفّان بلا تداخل */
 @media (orientation:portrait){
@@ -191,6 +197,17 @@ button.hex:active{transform:scale(.95)}
 .tog.on{background:linear-gradient(135deg,#7a3fd8,#2f8aa6);border-color:var(--gold)}
 .tog.on::after{left:25px;background:var(--gold2);box-shadow:0 0 10px rgba(240,201,112,.8)}
 
+
+/* دخول الواجهة */
+#intro.pre #tagline,#intro.pre #logo,#intro.pre #menuBtns>*,#intro.pre #ver{opacity:0}
+#intro:not(.pre) #tagline{animation:inDrop .6s cubic-bezier(.2,1.2,.4,1) both}
+#intro:not(.pre) #logo{animation:inLogo .9s cubic-bezier(.2,1.1,.3,1) .12s both,floaty 4s ease-in-out 1.1s infinite}
+#intro:not(.pre) #menuBtns>*{animation:inUp .55s cubic-bezier(.2,1.3,.4,1) both}
+#intro:not(.pre) #menuBtns>:nth-child(1){animation-delay:.45s}#intro:not(.pre) #menuBtns>:nth-child(2){animation-delay:.55s}#intro:not(.pre) #menuBtns>:nth-child(3){animation-delay:.63s}#intro:not(.pre) #menuBtns>:nth-child(4){animation-delay:.71s}#intro:not(.pre) #menuBtns>:nth-child(5){animation-delay:.79s}
+#intro:not(.pre) #ver{animation:inUp .5s ease .95s both}
+@keyframes inDrop{from{opacity:0;transform:translateY(-24px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes inLogo{from{opacity:0;transform:scale(.7);filter:blur(8px) brightness(2)}to{opacity:1;transform:none}}
+@keyframes inUp{from{opacity:0;transform:translateY(34px) scale(.9)}to{opacity:1;transform:none}}
 /* ===== الشاشة الرئيسية ===== */
 #intro{background:radial-gradient(ellipse at 50% 38%,rgba(10,4,32,.05),rgba(6,2,20,.55));backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;align-items:stretch}
 #intro .wrap{position:relative;width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:max(14px,env(safe-area-inset-top)) 18px max(12px,env(safe-area-inset-bottom));min-height:100%}
@@ -273,6 +290,20 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
 #levels[data-w="3"] .lvLine .flow{stroke-dasharray:1 14;stroke-linecap:round;stroke-width:5px}
 .lvNode em{font:normal 600 9.5px var(--sans);letter-spacing:.4px;color:rgba(255,244,214,.85);text-shadow:0 1px 6px #000;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis}
 #toast,#hint{z-index:40}
+
+/* أداء + شكل المراحل v20 */
+#lvBg{transform:translateZ(0);will-change:transform}
+#lvPath{contain:layout style}
+.lvNode,.lvNode .hx{filter:none!important;animation:none!important;will-change:auto}
+.lvNode.cur .hx{animation:lvcur2 1.6s ease-in-out infinite!important;box-shadow:none}
+@keyframes lvcur2{50%{transform:scale(1.1)}}
+.lvLine .flow{animation:none!important;filter:none!important}
+.lvLine .base{stroke:rgba(var(--wa),.3)}
+.lvNode .hx b{font:800 21px var(--serif);background:linear-gradient(180deg,#fff,#ffe9a8 60%,#e0a838);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;filter:none}
+.lvNode .hx::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 35% 22%,rgba(255,255,255,.35),transparent 55%);pointer-events:none}
+.lvNode.cur .hx b,.lvNode.done .hx b{-webkit-text-fill-color:transparent}
+.lvNode .hx{box-shadow:none}
+.lvNode.done::before,.lvNode.cur::before{content:'';position:absolute;left:50%;top:28px;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;background:radial-gradient(circle,rgba(var(--wa),.4),transparent 68%);pointer-events:none;z-index:-1}
 </style>
 </head>
 <body>
@@ -319,9 +350,9 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
   <div id="scrim"></div>
   <div id="lawSheet" role="menu" aria-label="قوانين LAW SHIFTER">
     <h4>LAW SHIFTER</h4>
-    <button class="lawBtn" data-law="gravity"><span class="ico"><svg class="ic"><use href="#i-gravity"/></svg></span><span class="nm">GRAVITY<small>غيّر اتجاه سقوط الكتلة</small></span><span class="st">ACTIVE</span></button>
-    <button class="lawBtn lock" data-law="attraction"><span class="ico"><svg class="ic"><use href="#i-attraction"/></svg></span><span class="nm">ATTRACTION<small>يُفتح في THE PULLING VOID</small></span><svg class="ic sm"><use href="#i-lock"/></svg></button>
-    <button class="lawBtn lock" data-law="reflection"><span class="ico"><svg class="ic"><use href="#i-reflection"/></svg></span><span class="nm">REFLECTION<small>يُفتح في THE LIGHTLESS ARCHIVE</small></span><svg class="ic sm"><use href="#i-lock"/></svg></button>
+    <button class="lawBtn on" data-law="gravity"><img class="li" src="assets/law-gravity.webp" alt="" width="200" height="160"><span class="nm">GRAVITY<small>غيّر اتجاه سقوط الكتلة</small></span><span class="st"></span></button>
+    <button class="lawBtn lock" data-law="attraction"><img class="li" src="assets/law-attraction.webp" alt="" width="200" height="153"><span class="nm">ATTRACTION<small>يُفتح في THE PULLING VOID</small></span><span class="st"></span></button>
+    <button class="lawBtn lock" data-law="reflection"><img class="li" src="assets/law-reflection.webp" alt="" width="200" height="159"><span class="nm">REFLECTION<small>يُفتح في THE LIGHTLESS ARCHIVE</small></span><span class="st"></span></button>
   </div>
   <div id="bottom">
     <div class="hex" id="bar">
@@ -344,7 +375,7 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
   </div>
 </div>
 
-<div class="panel show" id="intro"><div class="wrap">
+<div class="panel show pre" id="intro"><div class="wrap">
   <div class="hex" id="tagline"><span>SHIFT THE LAWS…<br>CHANGE THE WORLD</span></div>
   <img id="logo" src="assets/logo.webp" alt="LAWLESS" width="1000" height="514">
   <div id="introBottom">
