@@ -354,6 +354,8 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
 #worlds .scTop h3::after{content:"";position:absolute;left:50%;bottom:2px;width:150px;height:8px;margin-left:-75px;background:linear-gradient(90deg,transparent,#e9b84e 30%,#fff0b8 50%,#e9b84e 70%,transparent) center/100% 1.5px no-repeat;-webkit-text-fill-color:initial}
 #worlds .scTop h3::before{content:"";position:absolute;left:50%;bottom:-1px;width:9px;height:9px;margin-left:-4.5px;background:linear-gradient(135deg,#fff0b8,#e9b84e);transform:rotate(45deg);box-shadow:0 0 10px rgba(240,201,112,.9)}
 #worlds .scTop small{-webkit-text-fill-color:#cdbff0;margin-top:5px;font:500 12px var(--sans);letter-spacing:1px}
+body.instant #btnSim{opacity:.85}
+body.instant #btnSim.armed{animation:none}
 </style>
 </head>
 <body class="title">
@@ -492,6 +494,7 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
   <h2>SETTINGS</h2>
   <div class="setRow"><span>الصوت<small>المؤثرات والموسيقى</small></span><button class="tog on" id="tgSound" aria-label="الصوت"></button></div>
   <div class="setRow"><span>جودة المؤثرات البصرية<small>أوقفها لتوفير البطارية على الأجهزة الضعيفة</small></span><button class="tog on" id="tgFx" aria-label="المؤثرات"></button></div>
+  <div class="setRow"><span>الحركة الفورية<small>اسحب الكتلة فتتحرك مباشرة (أو أوقفها لوضع التخطيط)</small></span><button class="tog on" id="tgInst" aria-label="الحركة الفورية"></button></div>
   <div class="setRow"><span>اهتزاز الجهاز<small>عند فتح البوابة والتحطيم</small></span><button class="tog on" id="tgVib" aria-label="الاهتزاز"></button></div>
   <button class="btn" id="btnFs2"><svg class="ic sm"><use href="#i-fs"/></svg>ملء الشاشة</button>
   <button class="btn" id="btnDev">وضع المطوّر</button>

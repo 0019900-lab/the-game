@@ -1248,10 +1248,11 @@ function useHint() {
     G.hint = { stamp: G.moves, id: sol.path[0][0], dir: sol.path[0][1], stage: 0, t0: G.t };
   }
   var H = G.hint;
-  if (H.stage >= 2) { toast('الخطوة معروضة: اضغط SIMULATE'); return; }
+  if (H.stage >= 2) { toast(inst() ? 'اسحب الكتلة المضيئة في الاتجاه المطلوب' : 'الخطوة معروضة: اضغط SIMULATE'); return; }
   H.stage++; H.t0 = G.t; if (!save.dev) save.hints--; persist(); refreshHintBtn(); AudioFX.hint && AudioFX.hint(H.stage); vibrate(H.stage === 1 ? 14 : 26);
   if (H.stage === 1) toast('هذه الكتلة هي التي تحتاج الحركة الآن (اضغط التلميح مجددًا لكشف الاتجاه)');
   else {
+    if (inst()) { G.sel = H.id; refreshUI(); var AR = { up: 'لأعلى', down: 'لأسفل', left: 'لليسار', right: 'لليمين' }; toast(H.dir === 'mirror' ? 'استخدم REFLECTION على الكتلة المضيئة' : H.dir === 'pull' ? 'استخدم ATTRACTION على الكتلة المضيئة' : 'اسحب الكتلة المضيئة ' + AR[H.dir]); return; }
     G.law = H.dir === 'pull' ? 'pull' : H.dir === 'mirror' ? 'mirror' : 'gravity';
     G.plan = {}; G.sel = H.id; G.plan[H.id] = H.dir; recompute(); refreshUI();
     toast(H.dir === 'mirror' ? 'استخدم REFLECTION على هذه الكتلة ثم SIMULATE' : H.dir === 'pull' ? 'استخدم ATTRACTION على هذه الكتلة ثم SIMULATE' : 'غيّر جاذبية هذه الكتلة ثم SIMULATE');
@@ -1273,7 +1274,17 @@ function drawHint() {
   cx.fillStyle = '#c28a1e'; cx.fillRect(c[0] - r * 0.55, by + r * 0.85, r * 1.1, r * 0.5);
   cx.restore();
 }
+function inst() { return save.instant !== false; }
+function moveNow(id, d) {   // اللعب المباشر: السحب يحرّك الكتلة فورًا
+  var b = G.blocks[id]; if (!b || G.mode !== 'planning') return;
+  if (b.g === d) { AudioFX.click(); return; }
+  G.plan = {}; G.plan[id] = d; recompute();
+  var q = G.preview && G.preview.blocks[id];
+  if (!q || (q.x === b.x && q.y === b.y)) { G.plan = {}; G.preview = null; G.shake = Math.max(G.shake, 3); AudioFX.error(); vibrate(18); toast('هذا الاتجاه مسدود'); refreshUI(); return; }
+  runSim();
+}
 function setDir(id, d) {
+  if (inst()) { moveNow(id, d); return; }
   var b = G.blocks[id];
   if (G.plan[id] === d) delete G.plan[id];
   else if (b.g === d && !G.plan[id]) { AudioFX.click(); return; }
@@ -1325,7 +1336,7 @@ function refreshUI() {
   document.body.classList.toggle('sel', G.sel >= 0 && G.mode === 'planning');
   $('#btnUndo').disabled = G.mode !== 'planning' || !G.hist.length;
   $('#btnRedo').disabled = G.mode !== 'planning' || !G.redo.length;
-  var sim = $('#btnSim'); sim.disabled = G.mode !== 'planning'; sim.classList.toggle('armed', G.mode === 'planning' && planned > 0); sim.classList.toggle('run', G.mode === 'running'); sim.querySelector('span').textContent = G.mode === 'running' ? 'RUNNING' : 'SIMULATE';
+  var sim = $('#btnSim'); document.body.classList.toggle('instant', inst()); sim.disabled = G.mode !== 'planning'; sim.classList.toggle('armed', G.mode === 'planning' && planned > 0); sim.classList.toggle('run', G.mode === 'running'); sim.querySelector('span').textContent = G.mode === 'running' ? 'RUNNING' : inst() ? 'LIVE' : 'SIMULATE';
   var canDir = G.sel >= 0 && G.mode === 'planning' && G.law === 'gravity'; updateLawSheet();
   $$('#dpad button').forEach(function (b) { b.disabled = !canDir; b.classList.toggle('on', canDir && G.plan[G.sel] === b.dataset.d); });
   var pips = ''; ROOMS.forEach(function (r, i) { if (!G.room.daily && r.w === G.room.w) pips += '<i class="' + (i === G.ri ? 'cur' : save.done[r.id] ? 'done' : '') + '"></i>'; });
@@ -1577,7 +1588,7 @@ function openMenuOld() { closeSheet(); buildMenu(); hide('#pause'); hide('#clear
 function updateMuteBtns() {
   var m = AudioFX.isMuted();
   $$('.js-mute').forEach(function (b) { b.querySelector('.t').textContent = m ? 'الصوت: متوقف' : 'الصوت: يعمل'; b.querySelector('use').setAttribute('href', m ? '#i-mute' : '#i-sound'); });
-  $('#tgSound').classList.toggle('on', !m); $('#tgFx').classList.toggle('on', save.fx); $('#tgVib').classList.toggle('on', save.vib);
+  $('#tgSound').classList.toggle('on', !m); $('#tgFx').classList.toggle('on', save.fx); $('#tgVib').classList.toggle('on', save.vib); $('#tgInst').classList.toggle('on', inst());
 }
 function dayKey(off) { var d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() + ''; }
 function dailyRoom() {
@@ -1672,7 +1683,7 @@ window.addEventListener('keydown', function (e) {
 });
 
 /* ---------- ربط الأزرار ---------- */
-$('#btnSim').onclick = function () { AudioFX.init(); var sb = $('#btnSim'); sb.classList.remove('fire'); void sb.offsetWidth; sb.classList.add('fire'); runSim(); };
+$('#btnSim').onclick = function () { AudioFX.init(); if (inst()) { save.instant = false; persist(); updateMuteBtns(); refreshUI(); toast('وضع التخطيط: اختر الاتجاهات ثم SIMULATE (يمكن العودة من الإعدادات)'); return; } var sb = $('#btnSim'); sb.classList.remove('fire'); void sb.offsetWidth; sb.classList.add('fire'); runSim(); };
 $('#btnHint').onclick = useHint; refreshHintBtn();
 $('#btnUndo').onclick = undo; $('#btnRedo').onclick = redo; $('#btnReset').onclick = resetRoom;
 $('#btnMenu').onclick = function () { AudioFX.click(); goTitle(); };
@@ -1695,6 +1706,7 @@ $$('.js-mute').forEach(function (b) { b.onclick = toggleMute; });
 function toggleMute() { AudioFX.init(); AudioFX.setMuted(!AudioFX.isMuted()); save.muted = AudioFX.isMuted(); persist(); updateMuteBtns(); }
 $('#tgSound').onclick = toggleMute;
 $('#tgFx').onclick = function () { save.fx = !save.fx; persist(); updateMuteBtns(); AudioFX.click(); };
+$('#tgInst').onclick = function () { save.instant = !inst(); persist(); updateMuteBtns(); AudioFX.click(); refreshUI(); };
 $('#tgVib').onclick = function () { save.vib = !save.vib; persist(); updateMuteBtns(); AudioFX.click(); vibrate(30); };
 $('#btnWipe').onclick = function () {
   var b = $('#btnWipe');
