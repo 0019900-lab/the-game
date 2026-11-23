@@ -318,7 +318,8 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
 #devRow{display:none;gap:8px;margin:6px 0}#devRow.show{display:flex}
 #devPw{flex:1;min-width:0;padding:10px 12px;border-radius:12px;border:1.5px solid var(--gold);background:rgba(10,4,32,.8);color:#fff;font:600 16px var(--sans);text-align:center;letter-spacing:4px}
 #devRow .btn{width:auto;padding:0 16px}
-.hintFab{position:absolute!important;right:22%;bottom:calc(100% + 6px);--h:44px;color:var(--gold2);z-index:45}
+.hintFab{position:absolute!important;left:50%;bottom:calc(100% - 20px);transform:translateX(-50%);--h:42px;color:var(--gold2);z-index:45;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6)) drop-shadow(0 0 8px rgba(240,201,112,.45))}
+.hintFab:active{transform:translateX(-50%) scale(.92)}
 .hintFab svg{width:22px;height:22px}
 .hintFab .bdg{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:linear-gradient(160deg,#fff0b8,#e9b84e);color:#3a2408;font:800 11px/20px var(--sans);text-align:center;z-index:2;box-shadow:0 0 8px rgba(240,201,112,.8)}
 .hintFab.empty{filter:grayscale(.8) brightness(.7)}
@@ -348,6 +349,11 @@ body.cine #top,body.cine #bottom,body.cine #hint{opacity:.25;pointer-events:none
 #levels[data-w="4"] .lvNode.done .hx{background:linear-gradient(160deg,#fff,#ffd978 45%,#3ad8c0)}
 #levels[data-w="4"] .lvNode.done .hx::before{background:linear-gradient(160deg,rgba(90,240,216,.7),#041820 75%)}
 #levels[data-w="4"] .lvLine .flow{stroke-dasharray:6 8;stroke-width:3px}
+
+#worlds .scTop h3{font:800 21px var(--serif);letter-spacing:8px;background:linear-gradient(180deg,#fffbe8,#ffe08a 55%,#d9962e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:none;filter:drop-shadow(0 0 10px rgba(240,201,112,.55)) drop-shadow(0 2px 2px rgba(0,0,0,.7));position:relative;padding-bottom:12px}
+#worlds .scTop h3::after{content:"";position:absolute;left:50%;bottom:2px;width:150px;height:8px;margin-left:-75px;background:linear-gradient(90deg,transparent,#e9b84e 30%,#fff0b8 50%,#e9b84e 70%,transparent) center/100% 1.5px no-repeat;-webkit-text-fill-color:initial}
+#worlds .scTop h3::before{content:"";position:absolute;left:50%;bottom:-1px;width:9px;height:9px;margin-left:-4.5px;background:linear-gradient(135deg,#fff0b8,#e9b84e);transform:rotate(45deg);box-shadow:0 0 10px rgba(240,201,112,.9)}
+#worlds .scTop small{-webkit-text-fill-color:#cdbff0;margin-top:5px;font:500 12px var(--sans);letter-spacing:1px}
 </style>
 </head>
 <body class="title">
