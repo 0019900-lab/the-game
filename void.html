@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0420"><title>LAWLESS: Eat the Laws — Void</title>
+<style>
+:root{--g:#f0c970;--g2:#ffe9a8;--v:#8a5cf0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#06021a;overflow:hidden;touch-action:none;font-family:system-ui,"Segoe UI",Tahoma,sans-serif;color:#fff}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hud{position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 12px 0;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
+.pill{pointer-events:auto;background:linear-gradient(180deg,rgba(60,32,130,.82),rgba(22,10,66,.86));border:1.5px solid var(--g);border-radius:14px;padding:7px 14px;font-weight:700;font-size:14px;letter-spacing:.5px;color:var(--g2);box-shadow:0 0 14px rgba(138,92,240,.45);backdrop-filter:blur(3px)}
+.pill b{color:#fff}.pill.btn{cursor:pointer;min-width:42px;text-align:center}
+#room{flex:1;text-align:center;font-size:13px}
+#belly{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 14px);display:flex;justify-content:center;gap:10px;pointer-events:none}
+#belly i{width:54px;height:54px;border-radius:16px;border:1.5px solid rgba(240,201,112,.5);background:rgba(20,8,60,.55);display:grid;place-items:center;overflow:hidden}
+#belly i img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,200,80,.9))}
+#belly i.on{border-color:var(--g);box-shadow:0 0 16px rgba(240,201,112,.6)}
+#tip{position:fixed;left:14px;right:14px;top:calc(env(safe-area-inset-top) + 62px);text-align:center;font-size:14px;line-height:1.6;color:#fff;background:rgba(14,6,44,.82);border:1px solid rgba(240,201,112,.45);border-radius:14px;padding:10px 14px;opacity:0;transition:opacity .35s;pointer-events:none}
+#tip.show{opacity:1}
+#end{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(6,2,26,.72);backdrop-filter:blur(4px)}
+#end.show{display:flex;animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+#end h2{margin:0;font-size:30px;letter-spacing:3px;color:var(--g2);text-shadow:0 0 22px rgba(240,201,112,.8)}
+#end p{margin:0;color:#cfc3ff}
+.big{pointer-events:auto;border:2px solid var(--g);background:linear-gradient(180deg,#5a33c0,#2a1380);color:#fff;font-weight:800;font-size:17px;padding:12px 30px;border-radius:16px;box-shadow:0 0 22px rgba(138,92,240,.7)}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+</style></head><body>
+<canvas id="cv"></canvas>
+<div class="hud"><a class="pill btn" id="back" href="index.html">⌂</a><div class="pill" id="room">—</div><div class="pill" id="cnt">◆ <b>0</b>/0</div><div class="pill btn" id="rst">↻</div></div>
+<div id="tip"></div><div id="belly"></div>
+<div id="end"><h2>GATE UNSEALED</h2><p id="endp"></p><button class="big" id="nxt">الغرفة التالية</button></div>
+<script src="audio.js"></script><script src="void.js"></script>
+</body></html>
