@@ -133,6 +133,7 @@ var AudioFX = (function () {
     hint: function (st) {
       if (!ac) return; var f = st === 1 ? 784 : 988; bell(hz ? f : f, 0, 0.1, sfx, 1.2); bell(f * 1.5, 0.09, 0.07, sfx, 1.2);
     },
+    mirror: function () { if (!ac) return; bell(1318, 0, 0.18, sfx, 1.4); bell(1760, 0.06, 0.16, sfx, 1.4); bell(2349, 0.12, 0.14, sfx, 1.4); },
     dir: function (d) {
       var now = ac ? ac.currentTime : 0; if (now - lastDir < 0.05) return; lastDir = now;
       var base = { up: 740, right: 622, down: 494, left: 554 }[d] || 600;

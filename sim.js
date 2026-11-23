@@ -4,7 +4,7 @@
   var DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   var NAMES = ['up', 'right', 'down', 'left'];
 
-  function clone(bs) { return bs.map(function (b) { return { id: b.id, x: b.x, y: b.y, g: b.g }; }); }
+  function clone(bs) { return bs.map(function (b) { var o = { id: b.id, x: b.x, y: b.y, g: b.g }; if (b.rg) o.rg = b.rg; return o; }); }
 
   // رموز الخريطة: # جدار | H عنصر محصّن | E بوابة | B كتلة | P مفتاح ضغط | . فراغ
   function load(room) {
@@ -20,7 +20,7 @@
       else if (c === 'P') plates.push({ x: x, y: y });
       else if (c === 'O') attr = { x: x, y: y };
     }
-    var lv = { w: w, h: h, solid: solid, kind: kind, plates: plates, gates: gates, attr: attr };
+    var lv = { w: w, h: h, solid: solid, kind: kind, plates: plates, gates: gates, attr: attr, mirror: !!room.mirror };
     lv.start = simulate(lv, blocks).blocks; // استقرار أولي
     return lv;
   }
@@ -34,6 +34,10 @@
       var moves = new Map();
       cur.forEach(function (b) {
         var d, nx, ny;
+        if (b.g === 'mirror') {   // REFLECTION: قفزة إلى الخانة المقابلة عبر محور الغرفة
+          if (iter || !lv.mirror) return; nx = w - 1 - b.x; ny = b.y; if (nx === b.x || lv.solid[ny * w + nx]) return;
+          moves.set(b.id, { id: b.id, fx: b.x, fy: b.y, tx: nx, ty: ny, jump: true }); return;
+        }
         if (b.g === 'pull') {   // ATTRACTION: خطوة نحو المغناطيس، المحور الأبعد أولًا
           if (!lv.attr) return;
           var ax = lv.attr.x - b.x, ay = lv.attr.y - b.y; if (!ax && !ay) return;
@@ -59,6 +63,7 @@
           if (ok) tgt.add(k); else { moves.delete(m.id); changed = true; }
         });
       }
+      cur.forEach(function (b) { if (b.g === 'mirror') b.g = b.rg || 'down'; });
       if (!moves.size) break;
       var step = Array.from(moves.values()).sort(function (a, b) { return a.id - b.id; });
       step.forEach(function (m) { var b = cur[m.id]; b.x = m.tx; b.y = m.ty; });
@@ -69,7 +74,7 @@
 
   function applyPlan(blocks, plan) {
     var c = clone(blocks);
-    c.forEach(function (b) { if (plan[b.id]) b.g = plan[b.id]; });
+    c.forEach(function (b) { if (plan[b.id]) { if (plan[b.id] === 'mirror') b.rg = b.g; b.g = plan[b.id]; } });
     return c;
   }
   function preview(lv, blocks, plan) { return simulate(lv, applyPlan(blocks, plan)); }
@@ -82,7 +87,7 @@
 
   // BFS: أقصر سلسلة أفعال (كتلة + اتجاه) تحل الغرفة. تعيد null إن لم يوجد حل.
   function solve(lv, maxDepth, opt) {
-    maxDepth = maxDepth || 12; var names = (lv.attr && !(opt && opt.noPull)) ? NAMES.concat(['pull']) : NAMES;
+    maxDepth = maxDepth || 12; var names = (lv.attr && !(opt && opt.noPull)) ? NAMES.concat(['pull']) : NAMES; if (lv.mirror && !(opt && opt.noMirror)) names = names.concat(['mirror']);
     var start = clone(lv.start);
     if (solved(lv, start)) return { path: [], states: 1, dead: 0 };
     var seen = new Set([key(start)]), q = [{ b: start, path: [] }], best = null, states = 1;
