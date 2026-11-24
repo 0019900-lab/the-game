@@ -16,22 +16,41 @@ var ROOMS = [
   { name: 'FIRST BITE', tip: 'اسحب Void بإصبعك. الثقب الأسود يسحب البلورات حوله: اجرّها إلى البوابة.',
     walls: [{ x: 120, y: 260, w: 120, h: 22 }, { x: 16, y: 400, w: 70, h: 22 }, { x: 274, y: 400, w: 70, h: 22 }],
     items: [{ t: 'cry', x: 80, y: 480 }, { t: 'cry', x: 280, y: 340 }], start: [180, 540] },
-  { name: 'SHOCKWAVE', tip: 'المكعب المعدني ثقيل. اضغط ضغطة سريعة لتتحول إلى الأبيض: موجة تدفع كل شيء بعيدًا.',
+  { name: 'SPIKE LANE', tip: 'الأشواك الحمراء تحطّم البلورة. مرّر بلوراتك في الممر الآمن بالنص. الحركة المفاجئة تجعلها تتأرجح!',
+    spikes: [{ x: 16, y: 280, w: 120, h: 150 }, { x: 224, y: 280, w: 120, h: 150 }],
+    walls: [], items: [{ t: 'cry', x: 70, y: 520 }, { t: 'cry', x: 290, y: 520 }], start: [180, 560] },
+  { name: 'SHOCKWAVE', tip: 'المكعب المعدني ثقيل. اضغط ضغطة سريعة لتتحول إلى الأبيض: موجة تدفع كل شيء بعيدًا. كل قلب يكلّف طاقة.',
     walls: [{ x: 16, y: 330, w: 136, h: 24 }, { x: 208, y: 330, w: 136, h: 24 }],
     items: [{ t: 'metal', x: 180, y: 342 }, { t: 'cry', x: 70, y: 220 }, { t: 'cry', x: 290, y: 220 }], start: [180, 520] },
+  { name: 'THE SAW', tip: 'المنشار يقتل البلورات لكنه لا يؤذي Void. اعبر في اللحظة المناسبة.',
+    saws: [{ ax: 40, ay: 300, bx: 320, by: 300, sp: 110 }],
+    walls: [{ x: 16, y: 150, w: 130, h: 20 }, { x: 214, y: 150, w: 130, h: 20 }], items: [{ t: 'cry', x: 90, y: 500 }, { t: 'cry', x: 270, y: 500 }], start: [180, 560] },
   { name: 'EAT THE LAW', tip: 'ابتلع الحجر الذهبي، ثم اضغط مطولًا فوق الحفرة لتبصق منطقة جاذبية تصعد بالبلورة.',
     walls: [{ x: 120, y: 400, w: 16, h: 120 }, { x: 204, y: 400, w: 16, h: 120 }, { x: 120, y: 520, w: 100, h: 16 }, { x: 16, y: 250, w: 90, h: 20 }],
-    items: [{ t: 'cry', x: 170, y: 490 }, { t: 'cry', x: 300, y: 450 }, { t: 'stone', x: 60, y: 520 }], start: [260, 560] }
+    items: [{ t: 'cry', x: 170, y: 490 }, { t: 'cry', x: 300, y: 450 }, { t: 'stone', x: 60, y: 520 }], start: [260, 560] },
+  { name: 'ZIGZAG', tip: 'الطاقة محدودة: السحب يستهلكها. خذ الطريق الأقصر ولا تتوقف.',
+    walls: [{ x: 16, y: 190, w: 236, h: 18 }, { x: 108, y: 310, w: 236, h: 18 }, { x: 16, y: 430, w: 236, h: 18 }],
+    spikes: [{ x: 252, y: 190, w: 92, h: 18 }, { x: 16, y: 310, w: 92, h: 18 }, { x: 252, y: 430, w: 92, h: 18 }],
+    items: [{ t: 'cry', x: 60, y: 540 }, { t: 'cry', x: 300, y: 540 }], start: [180, 580] },
+  { name: 'TWIN BLADES', tip: 'منشاران: أفقي وعمودي. المكعب المعدني يسدّ الفتحة. فكّر بالترتيب.',
+    saws: [{ ax: 40, ay: 200, bx: 320, by: 200, sp: 120 }, { ax: 180, ay: 380, bx: 180, by: 520, sp: 90 }],
+    walls: [{ x: 16, y: 300, w: 136, h: 22 }, { x: 208, y: 300, w: 136, h: 22 }],
+    items: [{ t: 'metal', x: 180, y: 311 }, { t: 'cry', x: 70, y: 470 }, { t: 'cry', x: 290, y: 470 }], start: [180, 580] },
+  { name: 'FINAL TEST', tip: 'كل ما تعلمته: قانون، منشار، أشواك، وطاقة.',
+    saws: [{ ax: 40, ay: 170, bx: 320, by: 170, sp: 100 }],
+    spikes: [{ x: 16, y: 250, w: 110, h: 90 }, { x: 234, y: 250, w: 110, h: 90 }],
+    walls: [{ x: 120, y: 430, w: 16, h: 110 }, { x: 204, y: 430, w: 16, h: 110 }, { x: 120, y: 540, w: 100, h: 16 }],
+    items: [{ t: 'cry', x: 170, y: 510 }, { t: 'cry', x: 300, y: 460 }, { t: 'stone', x: 50, y: 520 }], start: [260, 585] }
 ];
 var DEF = { cry: { r: 12, m: 1, img: 'it_cry_m', w: 38, kind: 'cry' }, metal: { r: 22, m: 6, img: 'it_metal', w: 52, kind: 'metal' }, stone: { r: 14, m: 1, img: 'law_grav', w: 42, kind: 'stone' } };
 /* ---------- الحالة ---------- */
-var G = { ri: 0, walls: [], items: [], zones: [], parts: [], rings: [], belly: [], got: 0, total: 0, t: 0, shake: 0, open: 0, done: false, flash: 0 };
+var G = { ri: 0, spikes: [], saws: [], en: 1, tired: 0, failed: false, walls: [], items: [], zones: [], parts: [], rings: [], belly: [], got: 0, total: 0, t: 0, shake: 0, open: 0, done: false, flash: 0 };
 var V = { x: 180, y: 560, vx: 0, vy: 0, r: 22, pol: 0, pa: 0, flipT: -1, ex: 'idle', exT: 0, blinkT: 2, idleT: 0, sq: 0, face: [0, -1], hold: 0 };
 var ptr = null;
 function loadRoom(i) {
   var R = ROOMS[G.ri = i % ROOMS.length]; G.walls = border().concat(R.walls.map(function (w) { return Object.assign({}, w); }));
   G.items = R.items.map(function (o) { var d = DEF[o.t]; return { t: o.t, d: d, x: o.x, y: o.y, vx: 0, vy: 0, r: d.r, m: d.m }; });
-  G.zones = []; G.parts = []; G.rings = []; G.belly = []; G.got = 0; G.total = G.items.filter(function (o) { return o.d.kind === 'cry'; }).length; G.open = 0; G.done = false; G.shake = 0;
+  G.spikes = (R.spikes || []).map(function (w) { return Object.assign({}, w); }); G.saws = (R.saws || []).map(function (a) { return Object.assign({ t: Math.random() * 6, x: a.ax, y: a.ay }, a); }); G.en = 1; G.tired = 0; G.failed = false; $('#endh').textContent = 'GATE UNSEALED'; G.zones = []; G.parts = []; G.rings = []; G.belly = []; G.got = 0; G.total = G.items.filter(function (o) { return o.d.kind === 'cry'; }).length; G.lost = 0; G.open = 0; G.done = false; G.shake = 0;
   V.x = R.start[0]; V.y = R.start[1]; V.vx = V.vy = 0; V.pol = 0; V.pa = 0; V.flipT = -1; ptr = null; setEx('idle');
   $('#room').textContent = (G.ri + 1) + ' · ' + R.name; $('#end').classList.remove('show'); hud(); tip(R.tip);
 }
@@ -49,7 +68,7 @@ function setEx(n) { V.ex = n; V.exT = 0; }
 /* ---------- الإدخال ---------- */
 function toW(e) { var r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - ox) / sc, y: (e.clientY - r.top - oy) / sc }; }
 cv.addEventListener('pointerdown', function (e) {
-  e.preventDefault(); snd('init'); if (G.done) return; var p = toW(e);
+  e.preventDefault(); snd('init'); if (G.done || G.failed) return; var p = toW(e);
   ptr = { x: p.x, y: p.y, sx: p.x, sy: p.y, ox: V.x - p.x, oy: V.y - p.y, t: G.t, moved: 0, held: 0, id: e.pointerId };
   try { cv.setPointerCapture(e.pointerId); } catch (er) {}
 });
@@ -57,8 +76,9 @@ cv.addEventListener('pointermove', function (e) { if (!ptr || e.pointerId !== pt
 function up(e) { if (!ptr || (e && e.pointerId !== ptr.id)) return; var q = ptr; ptr = null; if (!q.moved && !q.spat && G.t - q.t < 0.28 && !G.done) flip(); }
 cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', function () { ptr = null; });
 window.addEventListener('keydown', function (e) { if (e.key === ' ') { e.preventDefault(); flip(); } if (e.key === 'r') loadRoom(G.ri); if (e.key === 'x') spit(); });
-$('#rst').onclick = function () { snd('click'); loadRoom(G.ri); }; $('#nxt').onclick = function () { snd('click'); loadRoom(G.ri + 1); };
+$('#rst').onclick = function () { snd('click'); loadRoom(G.ri); }; $('#nxt').onclick = function () { snd('click'); loadRoom(G.failed ? G.ri : G.ri + 1); };
 function flip() {
+  if (G.done || G.failed) return; if (G.en < 0.08) { snd('error'); return; } G.en = Math.max(0, G.en - 0.08);
   V.pol = V.pol ? 0 : 1; V.flipT = 0; snd('click'); snd(V.pol ? 'activate' : 'absorb'); vib(V.pol ? 18 : 12); G.shake = Math.max(G.shake, 4);
   ring(V.x, V.y, V.pol ? '255,240,190' : '170,110,255', V.pol ? 1.6 : 1.2); burst(V.x, V.y, 18, V.pol ? 'rgba(255,236,170,.95)' : 'rgba(160,110,255,.95)', 160, 0.7);
   if (V.pol) G.items.forEach(function (o) { var dx = o.x - V.x, dy = o.y - V.y, d = Math.hypot(dx, dy) || 1; if (d < 190) { var k = (1 - d / 190) * 640 / o.m; o.vx += dx / d * k; o.vy += dy / d * k; } });   // موجة صدمة
@@ -76,6 +96,7 @@ function circRect(o, w, bounce) {
   if (d < 0.001) { nx = 0; ny = -1; d = 0; var l = o.x - w.x, r = w.x + w.w - o.x, t = o.y - w.y, b = w.y + w.h - o.y, m = Math.min(l, r, t, b); if (m === l) { nx = -1; ny = 0; } else if (m === r) { nx = 1; ny = 0; } else if (m === t) { nx = 0; ny = -1; } else { nx = 0; ny = 1; } } else { nx = dx / d; ny = dy / d; }
   o.x += nx * (o.r - d); o.y += ny * (o.r - d); var vn = o.vx * nx + o.vy * ny; if (vn < 0) { o.vx -= (1 + bounce) * vn * nx; o.vy -= (1 + bounce) * vn * ny; return -vn; } return 0;
 }
+function kill(i, o, why) { G.items.splice(i, 1); G.lost++; burst(o.x, o.y, 26, 'rgba(255,110,90,.95)', 230, 0.9); ring(o.x, o.y, '255,110,90', 1.2); snd('shatter'); vib(60); G.shake = 8; setEx('sad'); if (!G.failed) { G.failed = true; G.failT = 0; G.why = why; } }
 function step(dt) {
   G.t += dt;
   // حركة Void
@@ -90,27 +111,34 @@ function step(dt) {
   V.pa += ((V.pol ? 1 : 0) - V.pa) * Math.min(1, dt * 12); V.sq *= Math.pow(0.001, dt);
   if (V.flipT >= 0) { V.flipT += dt; if (V.flipT > 0.5) V.flipT = -1; }
   // العناصر
-  var R = V.pol ? 175 : 165;
+  var R = V.pol ? 175 : 165, grip = 0, pullK = G.tired ? 0.15 : 1;
   for (var i = G.items.length - 1; i >= 0; i--) {
     var o = G.items[i], dx = V.x - o.x, dy = V.y - o.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
     if (!V.pol && d < R) {
       if (o.d.kind === 'stone') { var f = 900 * (1 - d / R); o.vx += ux * f * dt; o.vy += uy * f * dt; if (d < V.r + 8 && G.belly.length < 2) { G.belly.push('grav'); G.items.splice(i, 1); snd('absorb'); snd('hint'); vib(30); ring(V.x, V.y, '255,190,70', 1.4); burst(o.x, o.y, 22, 'rgba(255,205,90,.95)', 190, 0.8); V.sq = -1; setEx('power'); hud(); tip('ابتلعت قانونًا! اضغط مطولًا (دون تحريك) لتبصقه.'); continue; } }
-      else { var rr = 50, f2 = (d - rr) * 60 * (1 - d / R * 0.6); o.vx += ux * f2 / Math.sqrt(o.m) * dt; o.vy += uy * f2 / Math.sqrt(o.m) * dt; o.vx -= (o.vx - V.vx) * 3.2 * dt * (d < rr * 2 ? 1 : 0.3); o.vy -= (o.vy - V.vy) * 3.2 * dt * (d < rr * 2 ? 1 : 0.3); }
+      else { if (d < 120 && o.d.kind === 'cry') grip++; var rr = 50, f2 = (d - rr) * 60 * (1 - d / R * 0.6) * pullK; o.vx += ux * f2 / Math.sqrt(o.m) * dt; o.vy += uy * f2 / Math.sqrt(o.m) * dt; o.vx -= (o.vx - V.vx) * 1.5 * dt * (d < rr * 2 ? 1 : 0.3); o.vy -= (o.vy - V.vy) * 1.5 * dt * (d < rr * 2 ? 1 : 0.3); }
     } else if (V.pol && d < R) { var f3 = 420 * Math.pow(1 - d / R, 1.5) / o.m; o.vx -= ux * f3 * dt; o.vy -= uy * f3 * dt; }
     G.zones.forEach(function (z) { if (z.k === 'grav' && Math.hypot(o.x - z.x, o.y - z.y) < z.r) o.vy -= 1500 * dt / Math.sqrt(o.m) * Math.min(1, z.t * 4); });
-    o.vx *= Math.pow(V.pol ? 0.35 : 0.28, dt); o.vy *= Math.pow(V.pol ? 0.35 : 0.28, dt);
-    o.x += o.vx * dt; o.y += o.vy * dt; var hit = 0; G.walls.forEach(function (w) { hit = Math.max(hit, circRect(o, w, 0.35)); }); if (hit > 140) { snd('impact', 'wall', Math.min(1, hit / 500)); burst(o.x, o.y, 6, 'rgba(240,201,112,.8)', 90, 0.4); }
+    o.vx *= Math.pow(V.pol ? 0.35 : 0.5, dt); o.vy *= Math.pow(V.pol ? 0.35 : 0.5, dt);
+    o.x += o.vx * dt; o.y += o.vy * dt; var hit = 0; G.walls.forEach(function (w) { hit = Math.max(hit, circRect(o, w, 0.35)); }); if (hit > 140) { snd('impact', 'wall', Math.min(1, hit / 500)); burst(o.x, o.y, 6, 'rgba(240,201,112,.8)', 90, 0.4); } if (o.d.kind === 'cry' && hit > 330) { kill(i, o, 'تحطّمت من الاصطدام'); continue; }
+    if (o.d.kind === 'cry') { var dead = 0; G.spikes.forEach(function (w) { if (o.x > w.x - 4 && o.x < w.x + w.w + 4 && o.y > w.y - 4 && o.y < w.y + w.h + 4) dead = 1; }); G.saws.forEach(function (sw) { if (Math.hypot(o.x - sw.x, o.y - sw.y) < 20 + o.r) dead = 2; }); if (dead) { kill(i, o, dead === 2 ? 'قطعها المنشار' : 'اخترقتها الأشواك'); continue; } }
     // تصادم مع Void
     if (o.d.kind === 'metal') { var vx = o.x - V.x, vy = o.y - V.y, vd = Math.hypot(vx, vy), mn = o.r + V.r; if (vd < mn && vd > 0.01) { o.x += vx / vd * (mn - vd) * 0.5; o.y += vy / vd * (mn - vd) * 0.5; V.x -= vx / vd * (mn - vd) * 0.5; V.y -= vy / vd * (mn - vd) * 0.5; } }
     // تسليم البلورات
     if (o.d.kind === 'cry' && o.x > 135 && o.x < 225 && o.y < 70) { G.items.splice(i, 1); G.got++; snd('tick', G.got * 2); snd('plate', true); vib([20, 30, 40]); burst(o.x, 40, 28, 'rgba(255,225,140,.95)', 230, 0.9); ring(o.x, 50, '255,220,120', 1.6); setEx('happy'); G.flash = 0.5; hud(); }
   }
+  G.saws.forEach(function (sw) { sw.t += dt; var L = Math.hypot(sw.bx - sw.ax, sw.by - sw.ay), ph = (sw.t * sw.sp) % (2 * L), u = (ph < L ? ph : 2 * L - ph) / L; sw.x = sw.ax + (sw.bx - sw.ax) * u; sw.y = sw.ay + (sw.by - sw.ay) * u; });
+  // الطاقة
+  if (!V.pol && grip && !G.tired) G.en = Math.max(0, G.en - dt * (0.05 + 0.07 * grip)); else G.en = Math.min(1, G.en + dt * 0.22);
+  if (G.en <= 0 && !G.tired) { G.tired = 1; snd('error'); setEx('sad'); tip('نفدت الطاقة! ارتح قليلًا لتستعيدها.'); } if (G.tired && G.en > 0.4) G.tired = 0;
+  var enb = $('#en i'); if (enb) { enb.style.width = (G.en * 100) + '%'; enb.className = G.tired ? 'low' : G.en < 0.3 ? 'low' : ''; }
   for (var a = 0; a < G.items.length; a++) for (var b = a + 1; b < G.items.length; b++) { var p = G.items[a], q = G.items[b], ddx = q.x - p.x, ddy = q.y - p.y, dd = Math.hypot(ddx, ddy), mn2 = p.r + q.r; if (dd < mn2 && dd > 0.01) { var nx = ddx / dd, ny = ddy / dd, pen = mn2 - dd, tm = p.m + q.m; p.x -= nx * pen * q.m / tm; p.y -= ny * pen * q.m / tm; q.x += nx * pen * p.m / tm; q.y += ny * pen * p.m / tm; } }
   G.zones.forEach(function (z) { z.t += dt; if (Math.random() < dt * 40) G.parts.push({ x: z.x + (Math.random() - 0.5) * z.r * 1.6, y: z.y + z.r * 0.5, vx: 0, vy: -90 - Math.random() * 90, l: 0, L: 0.9, c: 'rgba(255,200,90,.9)', z: 2 }); }); G.zones = G.zones.filter(function (z) { return z.t < z.L; });
   G.parts.forEach(function (p) { p.l += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.pow(0.1, dt); p.vy *= Math.pow(0.1, dt); }); G.parts = G.parts.filter(function (p) { return p.l < p.L; });
   G.rings.forEach(function (r) { r.t += dt; }); G.rings = G.rings.filter(function (r) { return r.t < 0.7; });
   G.shake *= Math.pow(0.0006, dt); G.flash = Math.max(0, G.flash - dt);
-  if (G.got >= G.total && G.total && !G.done) { G.done = true; G.doneT = 0; snd('success'); vib([40, 60, 90]); G.shake = 9; }
+  if (G.failed && !G.done) { G.failT += dt; if (G.failT > 1.1 && !$('#end').classList.contains('show')) { $('#endh').textContent = 'فقدت بلورة'; $('#endp').textContent = G.why; $('#nxt').textContent = 'أعد المحاولة'; $('#end').classList.add('show'); } }
+  if (G.got >= G.total && G.total && !G.done && !G.failed) { G.done = true; G.doneT = 0; snd('success'); vib([40, 60, 90]); G.shake = 9; }
   if (G.done) { G.doneT += dt; G.open = Math.min(1, G.doneT * 2.2); if (G.doneT > 0.15 && !G.burst) { G.burst = 1; for (var k = 0; k < 6; k++) setTimeout(function () { burst(180, 70, 30, 'rgba(255,230,150,.95)', 300, 1); ring(180, 70, '255,225,130', 2); }, k * 90); } if (G.doneT > 1.4 && !$('#end').classList.contains('show')) { $('#endp').textContent = 'الغرفة ' + (G.ri + 1) + ' من ' + ROOMS.length; $('#nxt').textContent = G.ri + 1 < ROOMS.length ? 'الغرفة التالية' : 'من البداية'; $('#end').classList.add('show'); setEx('happy'); } }
   else G.burst = 0;
   // تعبير
@@ -155,6 +183,8 @@ function render() {
   var rr = V.pol ? 175 : 165; cx.save(); cx.globalCompositeOperation = 'lighter'; cx.strokeStyle = V.pol ? 'rgba(255,236,170,.2)' : 'rgba(150,100,255,.25)'; cx.lineWidth = 1.5; cx.setLineDash([4, 10]); cx.lineDashOffset = (V.pol ? 1 : -1) * G.t * 30; cx.beginPath(); cx.arc(V.x, V.y, rr, 0, 7); cx.stroke(); cx.restore();
   // البوابة
   var gimg = IM[G.open > 0.3 ? 'gate_open' : 'gate_closed']; if (gimg.width) { var gw = 190, gh = gw * gimg.height / gimg.width; if (G.open > 0) { cx.save(); cx.globalCompositeOperation = 'lighter'; dglow('255,220,120', 180, 76, 150 * (0.8 + G.open * 0.5), 0.6 * G.open + G.flash); cx.restore(); } cx.drawImage(gimg, 180 - gw / 2, 56 - gh * 0.42, gw, gh); } else { cx.fillStyle = '#f0c970'; cx.fillRect(135, 20, 90, 40); }
+  G.spikes.forEach(function (w) { var g = cx.createLinearGradient(0, w.y, 0, w.y + w.h); g.addColorStop(0, 'rgba(120,10,30,.55)'); g.addColorStop(1, 'rgba(60,0,20,.55)'); cx.fillStyle = g; cx.fillRect(w.x, w.y, w.w, w.h); cx.save(); cx.globalCompositeOperation = 'lighter'; cx.fillStyle = 'rgba(255,70,60,.55)'; var tw = 14; for (var yy = w.y + 2; yy < w.y + w.h - 8; yy += 18) for (var xx = w.x + 2; xx < w.x + w.w - tw; xx += tw + 4) { cx.beginPath(); cx.moveTo(xx, yy + 14); cx.lineTo(xx + tw / 2, yy); cx.lineTo(xx + tw, yy + 14); cx.fill(); } cx.strokeStyle = 'rgba(255,120,90,' + (0.5 + Math.sin(G.t * 4) * 0.2) + ')'; cx.lineWidth = 2; cx.strokeRect(w.x, w.y, w.w, w.h); cx.restore(); });
+  G.saws.forEach(function (sw) { cx.save(); cx.strokeStyle = 'rgba(255,120,90,.18)'; cx.lineWidth = 3; cx.setLineDash([3, 7]); cx.beginPath(); cx.moveTo(sw.ax, sw.ay); cx.lineTo(sw.bx, sw.by); cx.stroke(); cx.setLineDash([]); cx.translate(sw.x, sw.y); cx.globalCompositeOperation = 'lighter'; dglow('255,90,70', 0, 0, 44, 0.7); cx.globalCompositeOperation = 'source-over'; cx.rotate(G.t * 9); cx.fillStyle = '#e9d9ff'; cx.beginPath(); for (var k = 0; k < 24; k++) { var a = k / 24 * 6.283, rr = k % 2 ? 14 : 22; cx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } cx.closePath(); cx.fill(); cx.fillStyle = '#c0283c'; cx.beginPath(); cx.arc(0, 0, 9, 0, 7); cx.fill(); cx.fillStyle = '#ffe9a8'; cx.beginPath(); cx.arc(0, 0, 4, 0, 7); cx.fill(); cx.restore(); });
   G.walls.forEach(drawWall);
   G.items.forEach(function (o) { var im = IM[o.d.img]; if (!im.width) return; var w = o.d.w, h = w * im.height / im.width, bob = o.d.kind === 'stone' ? Math.sin(G.t * 3 + o.x) * 3 : 0; cx.save(); cx.translate(o.x, o.y + bob); if (o.d.kind !== 'metal') cx.rotate(o.vx * 0.0012); cx.shadowColor = o.d.kind === 'stone' ? 'rgba(255,190,70,.9)' : o.d.kind === 'cry' ? 'rgba(170,110,255,.9)' : 'rgba(0,0,0,.6)'; cx.shadowBlur = 14; cx.drawImage(im, -w / 2, -h / 2, w, h); cx.restore(); });
   drawVoid();
@@ -169,5 +199,5 @@ window.addEventListener('resize', layout);
 var last = 0;
 function loop(ts) { var dt = Math.min(0.033, (ts - last) / 1000 || 0.016); last = ts; var n = 2; for (var i = 0; i < n; i++) step(dt / n); render(); requestAnimationFrame(loop); }
 function boot() { layout(); loadRoom(+(new URLSearchParams(location.search).get('r') || 0)); requestAnimationFrame(loop); }
-window.__void = { G: G, V: V, loadRoom: loadRoom, flip: flip, spit: spit, step: step, setPtr: function (p) { ptr = p; } };
+window.__void = { G: G, V: V, loadRoom: loadRoom, flip: flip, spit: spit, step: step, setPtr: function (p) { ptr = p; }, kill: kill };
 })();
